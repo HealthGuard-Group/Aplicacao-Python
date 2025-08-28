@@ -5,14 +5,13 @@ import os
 
 load_dotenv()
 
-
 def selecionar_porcentagem_cpu():
 
     config = {
-      'user': "seu usuário",
-      'password': "sua senha",
-      'host': 'seu host, (se local é localhost)',
-      'database': "seu banco de dados"
+      'user': os.getenv("USER_DB"),
+      'password': os.getenv("PASSWORD_DB"),
+      'host': os.getenv("HOST_DB"),
+      'database': os.getenv("DATABASE_DB")
     }
 
     try:
