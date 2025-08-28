@@ -68,7 +68,29 @@ def inserir_dados_memoria(memoria_GB_free, memoria_usada_GB):
     except Error as e:
         print('Erro ao conectar com MySQL -', e)
         
-##############################################################################################        
+##############################################################################################     
+
+def inserir_dados_memoria(disco_GB_free, disco_usado_GB, disco_usado_pocentagem):
+    index_disco = 3 # ID do componente 'Memória RAM'
+    config = {
+        'user': os.getenv("USER"),
+        'password': os.getenv("PASSWORD"),
+        'host': os.getenv("HOST"),
+        'database': os.getenv("DATABASE")
+    }
+    try:
+        db = connect(**config)
+        if db.is_connected():
+            with db.cursor() as cursor:
+                # O comando SQL agora tem duas colunas para a memória
+                query = "INSERT INTO healthguard.captura (fkComponente, GB_LIVRE, GB_EM_USO, dtCaptura) VALUES (%s, %s, %s, %s)"
+                value = (index_disco, memoria_GB_free, memoria_usada_GB, datetime.datetime.now())
+                cursor.execute(query, value)
+                db.commit()
+                print("Registro de Memória inserido com sucesso!")
+            db.close()
+    except Error as e:
+        print('Erro ao conectar com MySQL -', e)   
 
 
 for i in range(4):
@@ -99,6 +121,10 @@ for i in range(4):
     memoria_usada_GB = memoria_total_GB - memoria_livre_GB # faz oepração aritmetica para saber o GB EM USO
 
     memoria_formatada_em_uso = f'{memoria_usada_GB:.2f}'
+
+    #################################################################################
+
+    
 
     
 
