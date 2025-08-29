@@ -26,7 +26,7 @@ def inserir_porcentagem_cpu(porcentagem):
         db = connect(**config)
         if db.is_connected():
             db_info = db.server_info
-            print('Connected to MySQL server version -', db_info)
+            # print('Connected to MySQL server version -', db_info)
            
             with db.cursor() as cursor:
                 query = "INSERT INTO healthguard.captura (fkComponente, PORCENTAGEM_DE_USO, dtCaptura) VALUES (%s, %s, %s)"
@@ -34,7 +34,7 @@ def inserir_porcentagem_cpu(porcentagem):
                 cursor.execute(query, value)
                
                 db.commit()
-                print(cursor.rowcount, )
+                # print(cursor.rowcount, )
            
             cursor.close()
             db.close()
@@ -97,27 +97,6 @@ def inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado):
     #############################################################################################################
         
 
-def inserir_dados_rede(mbps_upload, mbps_download):
-    index_rede = 3
-    config = {
-        'user': os.getenv("USER"),
-        'password': os.getenv("PASSWORD"),
-        'host': os.getenv("HOST"),
-        'database': os.getenv("DATABASE")
-    }
-    try:
-        db = connect(**config)
-        if db.is_connected():
-            with db.cursor() as cursor:
-                query = "INSERT INTO healthguard.captura (fkComponente,  Mbps_upload,  Mbps_download, dtCaptura) VALUES (%s, %s, %s, %s)"
-                value = (index_rede, mbps_upload, mbps_download, datetime.datetime.now())
-                cursor.execute(query, value)
-                db.commit()
-                print("")
-            db.close()
-    except Error as e:
-        print('Erro ao conectar com MySQL -', e)  
-
 for i in range(4):
 
     ###############################################################################
@@ -172,65 +151,32 @@ for i in range(4):
 
     ########################################################################
 
-    initial_bytes_sent = p.net_io_counters().bytes_sent ## quantidade de bytes enviados
-    initial_bytes_recv = p.net_io_counters().bytes_recv ## quantidade de bytes recebidos
-    time.sleep(1) # Espera por 1 segundo
-
-    final_bytes_sent = p.net_io_counters().bytes_sent # Obtenha as contagens de bytes finais
-    final_bytes_recv = p.net_io_counters().bytes_recv # Obtenha as contagens de bytes finais
-
-    bytes_sent_per_second = final_bytes_sent - initial_bytes_sent # Calcula a diferença entre as leituras finais e iniciais para obter os bytes transferidos e divida pelo tempo (1 segundo) para obter a velocidade. 
-    bytes_recv_per_second = final_bytes_recv - initial_bytes_recv
-
-    mbps_download = f'{(bytes_recv_per_second * 8) / 1000000:.2f}'
-    mbps_upload =  f'{(bytes_sent_per_second * 8) / 1000000:.2f}'
-
-    # Velocidade em Mbps (Megabits por segundo)
-    print(f"Mbps de upload: {(bytes_sent_per_second * 8) / 1000000:.2f}")
-    print(f"Mbps de download: {(bytes_recv_per_second * 8) / 1000000:.2f}")
-
 
 
 
     print(f"""
+╔══════════════════════════════════════════════════╗
+        ✅ Dados Inseridos no banco de dados!
+╚══════════════════════════════════════════════════╝
 
-<=============> Dados Inseridos no banco de dados com Sucesso!: <===================>
-          Porcentagem de uso da CPU: {porcentagem}%
+ 💻 CPU
+   ➤ Porcentagem de uso: {porcentagem}%
 
-        ##############################################
-         
-          GB de Memória RAM Livre: {memoria_GB_free:.2f}GB
+ 🧠 Memória RAM
+   ➤ GB Livre: {memoria_GB_free:.2f} GB
+   ➤ GB em Uso: {memoria_formatada_em_uso} GB
 
-        ##############################################
-         
-          GB de Memória RAM em Uso: {memoria_formatada_em_uso}GB
+ 💾 Disco
+   ➤ Porcentagem de uso: {disco_percent}%
+   ➤ GB Livre: {disco_livre_gb}
+   ➤ GB em Uso: {disco_usado_formatado} GB
 
-        ##############################################
-         
-          Porcentagem de uso do disco: {disco_percent}
+ ══════════════════════════════════════════════════
+ """)
 
-        ##############################################
-
-          GB livre do disco: {disco_livre_gb}
-
-        ##############################################
-
-          Disco em uso: {disco_usado_formatado}
-
-        ###############################################
-          
-          Mbps de download da rede: {mbps_download}
-
-        ###############################################
-          
-          Mbps de upload da rede: {mbps_upload}
-
-
-
-""")
 
 
     inserir_porcentagem_cpu(porcentagem)
     inserir_dados_memoria(memoria_livre_GB, memoria_usada_GB)
     inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado)
-    inserir_dados_rede(mbps_download, mbps_upload)
+  
