@@ -47,7 +47,7 @@ def inserir_porcentagem_cpu(porcentagem):
 
 
 def inserir_dados_memoria(memoria_GB_free, memoria_usada_GB):
-    index_memoria = 1 # ID do componente 'Memória RAM'
+    index_memoria = 1 
     config = {
         'user': os.getenv("USER"),
         'password': os.getenv("PASSWORD"),
@@ -147,12 +147,6 @@ for i in range(4):
 
 
 
-
-
-   
-
-   
-
     print(f"""
 
     <=============> Dados Inseridos: <===================>
@@ -181,8 +175,6 @@ for i in range(4):
 
 
 """)
-
-
 
 
     inserir_porcentagem_cpu(porcentagem)
