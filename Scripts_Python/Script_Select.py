@@ -21,6 +21,11 @@ def selecionar_porcentagem_cpu():
             print('Connected to MySQL server version -', db_info)
             
             with db.cursor() as cursor:
+
+
+
+
+                
                 query = "SELECT * FROM aula_sis.cpu;"
                 cursor.execute(query)
                 resultado = cursor.fetchall() 
