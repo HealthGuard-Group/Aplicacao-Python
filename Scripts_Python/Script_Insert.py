@@ -97,7 +97,7 @@ def inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado):
     #############################################################################################################
         
 
-for i in range(4):
+for i in range(30):
 
     ###############################################################################
     porcentagem = p.cpu_percent(interval=1, percpu=False)
@@ -149,10 +149,27 @@ for i in range(4):
 
     disco_usado_formatado = f'{disco_usado_gb:.2f}'
 
+   
+  ###########################################################################
+
+    memoria = p.virtual_memory() ## captura dados e métricas da memoria
+    memoria_livre = memoria.available   ## memoria livre em bytes
+    memoria_GB_free = memoria_livre / (1024**3)   ## memoria convertida pra GB
+    memoria_formatada = f"{memoria_GB_free:.2f} GB" ## memoria formatada com 2 casas decimais
+    memoria_total_GB = memoria.total / (1024**3) # Captura memoria TOTAL
+    memoria_livre_GB = memoria.available / (1024**3) # Memória livre em GB
+    memoria_usada_GB = memoria_total_GB - memoria_livre_GB # GB em uso
+    memoria_formatada_em_uso = f'{memoria_usada_GB:.2f}'
+
+    # Captura o uso do disco da partição raiz '/'
+    disco_objeto = p.disk_usage('/')
+    disco_percent = disco_objeto.percent
+    disco_livre_bytes = disco_objeto.free
+    disco_livre_gb = disco_livre_bytes / (1024**3)
+    disco_usado_gb = (disco_objeto.total - disco_livre_bytes) / (1024**3)
+    disco_usado_formatado = f'{disco_usado_gb:.2f}'
+
     ########################################################################
-
-
-
 
     print(f"""
 ╔══════════════════════════════════════════════════╗
@@ -161,7 +178,9 @@ for i in range(4):
 
  💻 CPU
    ➤ Porcentagem de uso: {porcentagem}%
+""")
 
+    print(f"""
  🧠 Memória RAM
    ➤ GB Livre: {memoria_GB_free:.2f} GB
    ➤ GB em Uso: {memoria_formatada_em_uso} GB
@@ -172,11 +191,8 @@ for i in range(4):
    ➤ GB em Uso: {disco_usado_formatado} GB
 
  ══════════════════════════════════════════════════
- """)
-
-
+""")
 
     inserir_porcentagem_cpu(porcentagem)
     inserir_dados_memoria(memoria_livre_GB, memoria_usada_GB)
     inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado)
-  
