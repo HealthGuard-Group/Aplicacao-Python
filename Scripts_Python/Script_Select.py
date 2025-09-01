@@ -108,57 +108,8 @@ where c.nome = "Memoria RAM";;"""
 resultadomemoria = selecionar_memoria()
 
 
-#===========================================================================
 
 
-def selecionar_rede():
-
-    config = {
-      'user': os.getenv("USER"),
-      'password': os.getenv("PASSWORD"),
-      'host': os.getenv("HOST"),
-      'database': os.getenv("DATABASE")
-    }
-
-    try:
-        db = connect(**config)
-        if db.is_connected():
-            db_info = db.server_info
-            print()
-            
-            with db.cursor() as cursor:
-    
-                query = """SELECT 
-u.nome              AS Usuario,
-e.razaoSocial       AS Empresa,
-m.marca             AS Maquina,
-m.sistemaOperacional AS SistemaOperacional,
-c.nome   AS Componente,
-CONCAT(cap.Mbps_download, " Mbps") AS "Mbps de Download da rede",
-CONCAT(cap.Mbps_upload, " Mbps") AS "Mbps de Upload da rede",
-cap.dtCaptura       AS DataCaptura
-FROM Usuario u
-JOIN Empresa e     ON u.fkEmpresa = e.idEmpresa
-JOIN Lote l        ON e.idEmpresa = l.fkEmpresa
-JOIN Maquina m     ON l.idLote = m.fkLote
-JOIN Componente c  ON m.idMaquina = c.fkMaquina
-LEFT JOIN Captura cap   ON c.idComponente = cap.fkComponente
-where c.nome = "Placa de Rede";
-;;"""
-
-
-                cursor.execute(query)
-                resultado = cursor.fetchall() 
-                
-            cursor.close()
-            db.close()
-            return resultado
-    
-    except Error as e:
-        print('Error to connect with MySQL -', e) 
-        
-        
-resultadorede = selecionar_rede()
 ########################################################################################
 def selecionar_disco():
 
