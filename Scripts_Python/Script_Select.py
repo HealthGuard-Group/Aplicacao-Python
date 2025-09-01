@@ -2,6 +2,7 @@ import psutil as p
 from mysql.connector import connect, Error
 from dotenv import load_dotenv
 import os
+import platform
 #############################################################
 
 load_dotenv()
@@ -31,15 +32,16 @@ e.razaoSocial       AS Empresa,
 m.marca             AS Maquina,
 m.sistemaOperacional AS SistemaOperacional,
 c.nome   AS Componente,
-CONCAT(cap.Porcentagem_DE_USO, "%") AS "Porcentagem CPU",
-cap.dtCaptura       AS DataCaptura
+CONCAT(cap.Porcentagem_DE_USO, "%")          AS "Porcentagem EM USO",
+cap.dtCaptura       AS DataCaptura,
+cap.DonoMaquina
 FROM Usuario u
 JOIN Empresa e     ON u.fkEmpresa = e.idEmpresa
 JOIN Lote l        ON e.idEmpresa = l.fkEmpresa
 JOIN Maquina m     ON l.idLote = m.fkLote
 JOIN Componente c  ON m.idMaquina = c.fkMaquina
 LEFT JOIN Captura cap   ON c.idComponente = cap.fkComponente
-WHERE c.nome = "Processador";"""
+where c.nome = "Processador";"""
                 cursor.execute(query)
                 resultado = cursor.fetchall() 
                 
@@ -84,7 +86,8 @@ m.sistemaOperacional AS SistemaOperacional,
 c.nome   AS Componente,
 CONCAT(ROUND(cap.GB_EM_USO, 1), " GB")          AS "GigaBytes EM USO",
 CONCAT(ROUND(GB_LIVRE, 2), " GB" )       AS "GigaBytes Livre",
-cap.dtCaptura       AS DataCaptura
+cap.dtCaptura       AS DataCaptura,
+cap.DonoMaquina
 FROM Usuario u
 JOIN Empresa e     ON u.fkEmpresa = e.idEmpresa
 JOIN Lote l        ON e.idEmpresa = l.fkEmpresa
@@ -137,7 +140,8 @@ c.nome   AS Componente,
 CONCAT(cap.Porcentagem_DE_USO, "%")          AS "Porcentagem EM USO",
 CONCAT(ROUND(cap.GB_EM_USO, 1), " GB")          AS "GigaBytes EM USO",
 CONCAT(ROUND(GB_LIVRE, 2), " GB" )       AS "GigaBytes Livre",
-cap.dtCaptura       AS DataCaptura
+cap.dtCaptura       AS DataCaptura,
+cap.DonoMaquina
 FROM Usuario u
 JOIN Empresa e     ON u.fkEmpresa = e.idEmpresa
 JOIN Lote l        ON e.idEmpresa = l.fkEmpresa
@@ -186,12 +190,13 @@ while loop == True:
 
     if decisao == 1:
         for i in range(tamanho_vetorcpu):
-           usuario, empresa, maquina, so, componente, cpu, hora = resultadocpu[i]
+           usuario, empresa, maquina, so, componente, cpu, hora, hostname = resultadocpu[i]
            print(f"""        
 ============================================================
                 📊 RELATÓRIO DA CPU
  ============================================================
  👤 Usuário:      {usuario}
+ 👤 Hostname:     {hostname}
  🏢 Empresa:      {empresa}
  💻 Máquina:      {maquina}
  🖥  Sistema:      {so}
@@ -204,12 +209,13 @@ while loop == True:
 """)
     if decisao == 2:
         for i in range(tamanho_vetormemoria):
-            usuario, empresa, maquina, so, componente, memoria_livre, memoria_em_uso, hora = resultadomemoria[i]
+            usuario, empresa, maquina, so, componente, memoria_livre, memoria_em_uso, hora,  hostname = resultadomemoria[i]
             print(f"""        
  ============================================================
                 📊 RELATÓRIO DA MEMÓRIA
  ============================================================
  👤 Usuário:      {usuario}
+ 👤 Hostname:     {hostname}
  🏢 Empresa:      {empresa}
  💻 Máquina:      {maquina}
  🖥  Sistema:      {so}
@@ -224,12 +230,13 @@ while loop == True:
  
     if decisao == 3:
         for i in range(tamanho_vetordisco):
-            usuario, empresa, maquina, so, componente, gblivre, gbuso, percent,  hora = resultadodisco[i]
+            usuario, empresa, maquina, so, componente, gblivre, gbuso, percent,  hora,  hostname = resultadodisco[i]
             print(f"""        
  ============================================================
                 📊 RELATÓRIO DO DISCO
  ============================================================
  👤 Usuário:      {usuario}
+ 👤 Hostname:     {hostname}
  🏢 Empresa:      {empresa}
  💻 Máquina:      {maquina}
  🖥  Sistema:      {so}

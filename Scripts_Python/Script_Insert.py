@@ -10,7 +10,7 @@ load_dotenv()
 #################################################################
 
 
-def inserir_porcentagem_cpu(porcentagem):
+def inserir_porcentagem_cpu(porcentagem, donoMaquina):
 
 
     index_cpu = 4
@@ -30,8 +30,8 @@ def inserir_porcentagem_cpu(porcentagem):
             # print('Connected to MySQL server version -', db_info)
            
             with db.cursor() as cursor:
-                query = "INSERT INTO healthguard.captura (fkComponente, PORCENTAGEM_DE_USO, dtCaptura) VALUES (%s, %s, %s)"
-                value = (index_cpu, porcentagem, datetime.datetime.now())
+                query = "INSERT INTO healthguard.captura (fkComponente, PORCENTAGEM_DE_USO, dtCaptura, DonoMaquina) VALUES (%s, %s, %s, %s)"
+                value = (index_cpu, porcentagem, datetime.datetime.now(), donoMaquina)
                 cursor.execute(query, value)
                
                 db.commit()
@@ -48,7 +48,7 @@ def inserir_porcentagem_cpu(porcentagem):
 
 
 
-def inserir_dados_memoria(memoria_GB_free, memoria_usada_GB):
+def inserir_dados_memoria(memoria_GB_free, memoria_usada_GB, donoMaquina):
     index_memoria = 1 
     config = {
         'user': os.getenv("USER"),
@@ -60,8 +60,8 @@ def inserir_dados_memoria(memoria_GB_free, memoria_usada_GB):
         db = connect(**config)
         if db.is_connected():
             with db.cursor() as cursor:
-                query = "INSERT INTO healthguard.captura (fkComponente, GB_LIVRE, GB_EM_USO, dtCaptura) VALUES (%s, %s, %s, %s)"
-                value = (index_memoria, memoria_GB_free, memoria_usada_GB, datetime.datetime.now())
+                query = "INSERT INTO healthguard.captura (fkComponente, GB_LIVRE, GB_EM_USO, dtCaptura, DonoMaquina) VALUES (%s, %s, %s, %s, %s)"
+                value = (index_memoria, memoria_GB_free, memoria_usada_GB, datetime.datetime.now(),donoMaquina)
                 cursor.execute(query, value)
                 db.commit()
                 print("")
@@ -71,7 +71,7 @@ def inserir_dados_memoria(memoria_GB_free, memoria_usada_GB):
        
 ##############################################################################################    
 
-def inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado):
+def inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado, donoMaquina):
     index_disco = 2
     config = {
         'user': os.getenv("USER"),
@@ -83,8 +83,8 @@ def inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado):
         db = connect(**config)
         if db.is_connected():
             with db.cursor() as cursor:
-                query = "INSERT INTO healthguard.captura (fkComponente, GB_LIVRE, GB_EM_USO, PORCENTAGEM_DE_USO, dtCaptura) VALUES (%s, %s, %s, %s, %s)"
-                value = (index_disco, disco_livre_gb, disco_usado_formatado, disco_percent, datetime.datetime.now())
+                query = "INSERT INTO healthguard.captura (fkComponente, GB_LIVRE, GB_EM_USO, PORCENTAGEM_DE_USO, dtCaptura, DonoMaquina) VALUES (%s, %s, %s, %s, %s, %s)"
+                value = (index_disco, disco_livre_gb, disco_usado_formatado, disco_percent, datetime.datetime.now(), donoMaquina)
                 cursor.execute(query, value)
                 db.commit()
                 print("")
@@ -114,7 +114,9 @@ for i in range(30):
  
     memoria_formatada = f"{memoria_GB_free:.2f} GB" ## memoria formatada com 2 casas decimais
    
-  
+
+    donoMaquina = platform.node()
+
     ###############################################################################
 
     memoria_total_GB = memoria.total / (1024**3) # Captura memoria TOTAL
@@ -131,8 +133,6 @@ for i in range(30):
     # Captura o uso do disco da partição raiz '/'
     disco_objeto = p.disk_usage('/')
     disco_percent =  p.disk_usage('/').percent
-
-
 
      # Espaço livre em bytes
     disco_livre_bytes = disco_objeto.free
@@ -187,9 +187,14 @@ for i in range(30):
 ╔══════════════════════════════════════════════════╗
         ✅ Dados Inseridos no banco de dados!
 ╚══════════════════════════════════════════════════╝
+          
+ 👤 Dono da máquina
+    Hostname: {donoMaquina}
+
 
  💻 CPU
    ➤ Porcentagem de uso: {porcentagem}%
+   
 """)
 
     print(f"""
@@ -205,6 +210,6 @@ for i in range(30):
  ══════════════════════════════════════════════════
 """)
 
-    inserir_porcentagem_cpu(porcentagem)
-    inserir_dados_memoria(memoria_livre_GB, memoria_usada_GB)
-    inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado)
+    inserir_porcentagem_cpu(porcentagem, donoMaquina)
+    inserir_dados_memoria(memoria_livre_GB, memoria_usada_GB, donoMaquina)
+    inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado, donoMaquina)
