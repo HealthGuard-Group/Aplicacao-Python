@@ -189,7 +189,7 @@ while loop == True:
            usuario, empresa, maquina, so, componente, cpu, hora = resultadocpu[i]
            print(f"""        
 ============================================================
-                📊 RELATÓRIO DO DISCO
+                📊 RELATÓRIO DA CPU
  ============================================================
  👤 Usuário:      {usuario}
  🏢 Empresa:      {empresa}
@@ -207,7 +207,7 @@ while loop == True:
             usuario, empresa, maquina, so, componente, memoria_livre, memoria_em_uso, hora = resultadomemoria[i]
             print(f"""        
  ============================================================
-                📊 RELATÓRIO DO DISCO
+                📊 RELATÓRIO DA MEMÓRIA
  ============================================================
  👤 Usuário:      {usuario}
  🏢 Empresa:      {empresa}

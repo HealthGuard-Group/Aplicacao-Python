@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 import datetime
 import time
+import platform
 
 load_dotenv()
 #################################################################
@@ -114,7 +115,6 @@ for i in range(30):
     memoria_formatada = f"{memoria_GB_free:.2f} GB" ## memoria formatada com 2 casas decimais
    
   
-
     ###############################################################################
 
     memoria_total_GB = memoria.total / (1024**3) # Captura memoria TOTAL
@@ -170,6 +170,18 @@ for i in range(30):
     disco_usado_formatado = f'{disco_usado_gb:.2f}'
 
     ########################################################################
+
+    # Pegar hostname
+
+  
+
+   
+    
+    hostname = platform.uname()
+    print(hostname)
+   
+   
+   
 
     print(f"""
 ╔══════════════════════════════════════════════════╗
