@@ -20,19 +20,19 @@
 <p>O site oferece as seguintes funcionalidades:</p>
 <ul>
     <li>
-        <strong>Funcionalidade 1:</strong> Lorem ipsum.
+        <strong>Funcionalidade 1:</strong> Coleta de métricas de hardware
     </li>
     <li>
-        <strong>Funcionalidade 2:</strong> Lorem ipsum.
+        <strong>Funcionalidade 2:</strong> Geração de logs históricos
     </li>
     <li>
-        <strong>Funcionalidade 3:</strong> Lorem ipsum.
+        <strong>Funcionalidade 3:</strong> Detecção de falhas ou comportamento anômalo
     </li>
     <li>
-        <strong>Funcionalidade 4:</strong> Lorem ipsum.
+        <strong>Funcionalidade 4:</strong> Customização e configuração de métricas
     </li>
     <li>
-        <strong>Funcionalidade 5:</strong> Lorem ipsum.
+        <strong>Funcionalidade 5:</strong> Alertas preditivos usando histórico
     </li>
 
 </ul>
