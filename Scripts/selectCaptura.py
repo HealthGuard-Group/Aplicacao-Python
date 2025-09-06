@@ -3,23 +3,17 @@ from mysql.connector import connect, Error
 from dotenv import load_dotenv
 import os
 import platform
-#############################################################
 
 load_dotenv()
 
-
-#############################################################
-
-
+config = {
+  'user': os.getenv("USER"),
+  'password': os.getenv("PASSWORD"),
+  'host': os.getenv("HOST"),
+  'database': os.getenv("DATABASE")
+}
 
 def selecionar_porcentagem_cpu():
-    config = {
-      'user': os.getenv("USER"),
-      'password': os.getenv("PASSWORD"),
-      'host': os.getenv("HOST"),
-      'database': os.getenv("DATABASE")
-    }
-
     try:
         db = connect(**config)
         if db.is_connected():
@@ -32,9 +26,9 @@ e.razaoSocial       AS Empresa,
 m.marca             AS Maquina,
 m.sistemaOperacional AS SistemaOperacional,
 c.nome   AS Componente,
-CONCAT(cap.Porcentagem_DE_USO, "%")          AS "Porcentagem EM USO",
+CONCAT(cap.porcentagemDeUso, "%")          AS "Porcentagem EM USO",
 cap.dtCaptura       AS DataCaptura,
-cap.DonoMaquina
+cap.hostname
 FROM Usuario u
 JOIN Empresa e     ON u.fkEmpresa = e.idEmpresa
 JOIN Lote l        ON e.idEmpresa = l.fkEmpresa
@@ -56,20 +50,7 @@ where c.nome = "Processador";"""
         
 resultadocpu = selecionar_porcentagem_cpu() 
 
-
-###############################################################################3
-
-
-
 def selecionar_memoria():
-
-    config = {
-      'user': os.getenv("USER"),
-      'password': os.getenv("PASSWORD"),
-      'host': os.getenv("HOST"),
-      'database': os.getenv("DATABASE")
-    }
-
     try:
         db = connect(**config)
         if db.is_connected():
@@ -84,10 +65,10 @@ e.razaoSocial       AS Empresa,
 m.marca             AS Maquina,
 m.sistemaOperacional AS SistemaOperacional,
 c.nome   AS Componente,
-CONCAT(ROUND(cap.GB_EM_USO, 1), " GB")          AS "GigaBytes EM USO",
-CONCAT(ROUND(GB_LIVRE, 2), " GB" )       AS "GigaBytes Livre",
+CONCAT(ROUND(cap.gbEmUso, 1), " GB")          AS "GigaBytes EM USO",
+CONCAT(ROUND(gbLivre, 2), " GB" )       AS "GigaBytes Livre",
 cap.dtCaptura       AS DataCaptura,
-cap.DonoMaquina
+cap.hostname
 FROM Usuario u
 JOIN Empresa e     ON u.fkEmpresa = e.idEmpresa
 JOIN Lote l        ON e.idEmpresa = l.fkEmpresa
@@ -110,19 +91,7 @@ where c.nome = "Memoria RAM";;"""
         
 resultadomemoria = selecionar_memoria()
 
-
-
-
-########################################################################################
 def selecionar_disco():
-
-    config = {
-      'user': os.getenv("USER"),
-      'password': os.getenv("PASSWORD"),
-      'host': os.getenv("HOST"),
-      'database': os.getenv("DATABASE")
-    }
-
     try:
         db = connect(**config)
         if db.is_connected():
@@ -137,11 +106,11 @@ e.razaoSocial       AS Empresa,
 m.marca             AS Maquina,
 m.sistemaOperacional AS SistemaOperacional,
 c.nome   AS Componente,
-CONCAT(cap.Porcentagem_DE_USO, "%")          AS "Porcentagem EM USO",
-CONCAT(ROUND(cap.GB_EM_USO, 1), " GB")          AS "GigaBytes EM USO",
-CONCAT(ROUND(GB_LIVRE, 2), " GB" )       AS "GigaBytes Livre",
+CONCAT(cap.porcentagemDeUso, "%")          AS "Porcentagem EM USO",
+CONCAT(ROUND(cap.gbEmUso, 1), " GB")          AS "GigaBytes EM USO",
+CONCAT(ROUND(cap.gbLivre, 2), " GB" )       AS "GigaBytes Livre",
 cap.dtCaptura       AS DataCaptura,
-cap.DonoMaquina
+cap.hostname12
 FROM Usuario u
 JOIN Empresa e     ON u.fkEmpresa = e.idEmpresa
 JOIN Lote l        ON e.idEmpresa = l.fkEmpresa
@@ -165,11 +134,6 @@ where c.nome = "Disco Rígido";
         
 resultadodisco = selecionar_disco()
 
-########################################################################################
-
-
-
-
 loop = True
 tamanho_vetormemoria = len(resultadomemoria)
 tamanho_vetorcpu = len(resultadomemoria)
@@ -179,12 +143,12 @@ while loop == True:
 
     decisao = int(input("""
  ╔════════════════════════════════════════════╗
-║              🖥️  MENU DO CLIENTE            ║
+║              🖥  MENU DO CLIENTE            ║
 ╠════════════════════════════════════════════╣
-║ 1️⃣  Visualizar Porcentagem do uso da CPU    ║
-║ 2️⃣  Visualizar Dados de Memória             ║
-║ 3️⃣  Visualizar Dados do Disco               ║
-║ 0️⃣  Sair                                    ║
+║ ⿡  Visualizar Porcentagem do uso da CPU    ║
+║ ⿢  Visualizar Dados de Memória             ║
+║ ⿣  Visualizar Dados do Disco               ║
+║ ⿠  Sair                                    ║
 ╚════════════════════════════════════════════╝
       """))
 
@@ -260,4 +224,3 @@ while loop == True:
 ╚════════════════════════════════════════════╝
 """)
                     
-  ########################################################################################

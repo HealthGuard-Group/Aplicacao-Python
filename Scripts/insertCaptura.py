@@ -7,150 +7,109 @@ import time
 import platform
 
 load_dotenv()
-#################################################################
 
-
-def inserir_porcentagem_cpu(porcentagem, donoMaquina):
-
-
-    index_cpu = 4
-
-
-    config = {
+config = {
       'user': os.getenv("USER"),
       'password': os.getenv("PASSWORD"),
       'host': os.getenv("HOST"),
       'database': os.getenv("DATABASE")
     }
 
+def inserir_porcentagem_cpu(porcentagem, donoMaquina):
     try:
         db = connect(**config)
         if db.is_connected():
             db_info = db.server_info
-            # print('Connected to MySQL server version -', db_info)
-           
+
             with db.cursor() as cursor:
-                query = "INSERT INTO healthguard.captura (fkComponente, PORCENTAGEM_DE_USO, dtCaptura, DonoMaquina) VALUES (%s, %s, %s, %s)"
-                value = (index_cpu, porcentagem, datetime.datetime.now(), donoMaquina)
-                cursor.execute(query, value)
-               
-                db.commit()
-                # print(cursor.rowcount, )
-           
-            cursor.close()
+                cursor.execute("SELECT idComponente FROM Componente WHERE nome LIKE 'Processador';")
+                resultado_index = cursor.fetchall()
+
+                index_cpu = resultado_index[0][0]
+
+                querySelect = "SELECT idNucleo FROM nucleo;"
+                cursor.execute(querySelect)
+                resultado_select = cursor.fetchall()
+    
+                for ax, i in enumerate(resultado_select):
+                    fk_nucleo = i[0]
+                    percent = porcentagem[ax]
+                    query = "INSERT INTO healthguard.captura (fkComponente, fkNucleo, porcentagemDeUso, hostname, dtCaptura) VALUES (%s, %s, %s, %s, %s)"
+                    value = (index_cpu, fk_nucleo, percent, dono_maquina, datetime.datetime.now())
+                    cursor.execute(query, value)
+                
+                db.commit()    
             db.close()
    
     except Error as e:
         print('Error to connect with MySQL -', e)
 
-######################################################################################################
 
-
-
-
-def inserir_dados_memoria(memoria_GB_free, memoria_usada_GB, donoMaquina):
-    index_memoria = 1 
-    config = {
-        'user': os.getenv("USER"),
-        'password': os.getenv("PASSWORD"),
-        'host': os.getenv("HOST"),
-        'database': os.getenv("DATABASE")
-    }
+def inserir_dados_memoria(memoria_GB_free, memoria_usada_GB, dono_maquina):
     try:
         db = connect(**config)
         if db.is_connected():
             with db.cursor() as cursor:
-                query = "INSERT INTO healthguard.captura (fkComponente, GB_LIVRE, GB_EM_USO, dtCaptura, DonoMaquina) VALUES (%s, %s, %s, %s, %s)"
-                value = (index_memoria, memoria_GB_free, memoria_usada_GB, datetime.datetime.now(),donoMaquina)
+                cursor.execute("SELECT idComponente FROM Componente WHERE nome LIKE 'Memória RAM';")
+                resultado_index = cursor.fetchall()
+
+                id_memoria = resultado_index[0][0]
+
+                query = "INSERT INTO healthguard.captura (fkComponente, gbLivre, gbEmUso, hostname, dtCaptura) VALUES (%s, %s, %s, %s, %s)"
+                value = (id_memoria, memoria_GB_free, memoria_usada_GB, dono_maquina, datetime.datetime.now())
+
                 cursor.execute(query, value)
                 db.commit()
                 print("")
             db.close()
     except Error as e:
         print('Erro ao conectar com MySQL -', e)
-       
-##############################################################################################    
 
-def inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado, donoMaquina):
-    index_disco = 2
-    config = {
-        'user': os.getenv("USER"),
-        'password': os.getenv("PASSWORD"),
-        'host': os.getenv("HOST"),
-        'database': os.getenv("DATABASE")
-    }
+def inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado, dono_maquina):
     try:
         db = connect(**config)
         if db.is_connected():
             with db.cursor() as cursor:
-                query = "INSERT INTO healthguard.captura (fkComponente, GB_LIVRE, GB_EM_USO, PORCENTAGEM_DE_USO, dtCaptura, DonoMaquina) VALUES (%s, %s, %s, %s, %s, %s)"
-                value = (index_disco, disco_livre_gb, disco_usado_formatado, disco_percent, datetime.datetime.now(), donoMaquina)
+                cursor.execute("SELECT idComponente FROM Componente WHERE nome LIKE 'Disco Rígido';")
+                resultado_id = cursor.fetchall()
+
+                id_disco = resultado_id[0][0]
+                query = "INSERT INTO healthguard.captura (fkComponente, gbLivre, gbEmUso, porcentagemDeUso, hostname,dtCaptura) VALUES (%s, %s, %s, %s, %s, %s)"
+                value = (id_disco,  disco_livre_gb, disco_usado_formatado, disco_percent, dono_maquina, datetime.datetime.now())
                 cursor.execute(query, value)
                 db.commit()
                 print("")
-            db.close()
+            db.close()  
     except Error as e:
-        print('Erro ao conectar com MySQL -', e) 
+        print('Erro ao conectar com MySQL -', e)         
 
-
-
-
-    #############################################################################################################
-        
 
 for i in range(30):
-
-    ###############################################################################
-    porcentagem = p.cpu_percent(interval=1, percpu=False)
-  ###########################################################################
+    porcentagem = p.cpu_percent(interval=1, percpu=True)
+    dono_maquina = platform.node()
 
    
     memoria = p.virtual_memory() ## captura dados e métricas da memoria
-   
-
     memoria_livre = memoria.available   ## memoria livre em bytes
-
     memoria_GB_free = memoria_livre / (1024**3)   ## memoria convertida pra GB
- 
     memoria_formatada = f"{memoria_GB_free:.2f} GB" ## memoria formatada com 2 casas decimais
    
-
-    donoMaquina = platform.node()
-
-    ###############################################################################
-
     memoria_total_GB = memoria.total / (1024**3) # Captura memoria TOTAL
-
-
     memoria_livre_GB = memoria.available / (1024**3) # Memória livre em GB, Captura memoria livre
-
-
     memoria_usada_GB = memoria_total_GB - memoria_livre_GB # faz oepração aritmetica para saber o GB EM USO
-
     memoria_formatada_em_uso = f'{memoria_usada_GB:.2f}'
 
-    #################################################################################
     # Captura o uso do disco da partição raiz '/'
     disco_objeto = p.disk_usage('/')
     disco_percent =  p.disk_usage('/').percent
 
-     # Espaço livre em bytes
-    disco_livre_bytes = disco_objeto.free
-
-     # Espaço livre em GB
-    disco_livre_gb = disco_livre_bytes / (1024**3)
-
-     # Porcentagem de espaço livre
-    porcentagem_livre = disco_objeto.free / disco_objeto.total * 100
-
-    # disco usado captura disco usado
-    disco_usado_gb = (disco_objeto.total - disco_livre_bytes) / (1024**3) 
-
+     
+    disco_livre_bytes = disco_objeto.free # Espaço livre em bytes
+    disco_livre_gb = disco_livre_bytes / (1024**3) # Espaço livre em GB
+    porcentagem_livre = disco_objeto.free / disco_objeto.total * 100 # Porcentagem de espaço livre
+    disco_usado_gb = (disco_objeto.total - disco_livre_bytes) / (1024**3) # disco usado captura disco usado
 
     disco_usado_formatado = f'{disco_usado_gb:.2f}'
-
-   
-  ###########################################################################
 
     memoria = p.virtual_memory() ## captura dados e métricas da memoria
     memoria_livre = memoria.available   ## memoria livre em bytes
@@ -169,27 +128,17 @@ for i in range(30):
     disco_usado_gb = (disco_objeto.total - disco_livre_bytes) / (1024**3)
     disco_usado_formatado = f'{disco_usado_gb:.2f}'
 
-    ########################################################################
-
-    # Pegar hostname
-
-  
-
-   
     
     hostname = platform.uname()
     print(hostname)
    
-   
-   
-
     print(f"""
 ╔══════════════════════════════════════════════════╗
         ✅ Dados Inseridos no banco de dados!
 ╚══════════════════════════════════════════════════╝
           
  👤 Dono da máquina
-    Hostname: {donoMaquina}
+    Hostname: {dono_maquina}
 
 
  💻 CPU
@@ -210,6 +159,6 @@ for i in range(30):
  ══════════════════════════════════════════════════
 """)
 
-    inserir_porcentagem_cpu(porcentagem, donoMaquina)
-    inserir_dados_memoria(memoria_livre_GB, memoria_usada_GB, donoMaquina)
-    inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado, donoMaquina)
+    inserir_porcentagem_cpu(porcentagem, dono_maquina)
+    inserir_dados_memoria(memoria_GB_free, memoria_usada_GB, dono_maquina)
+    inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado, dono_maquina)
