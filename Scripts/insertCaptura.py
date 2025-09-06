@@ -85,10 +85,12 @@ def inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado, do
 
 
 for i in range(30):
-    porcentagem = p.cpu_percent(interval=1, percpu=True)
+ 
     dono_maquina = platform.node()
 
-   
+  
+
+        
     memoria = p.virtual_memory() ## captura dados e métricas da memoria
     memoria_livre = memoria.available   ## memoria livre em bytes
     memoria_GB_free = memoria_livre / (1024**3)   ## memoria convertida pra GB
@@ -128,36 +130,47 @@ for i in range(30):
     disco_usado_gb = (disco_objeto.total - disco_livre_bytes) / (1024**3)
     disco_usado_formatado = f'{disco_usado_gb:.2f}'
 
-    
-    hostname = platform.uname()
-    print(hostname)
+
+
    
+    porcentagem = p.cpu_percent(interval=1, percpu=True)
+    dono_maquina = platform.node()
+
+
+   # Formata os núcleos da CPU de forma bonita
+    texto_nucleos = "╔═════════════╦═════════╗\n"
+    texto_nucleos += "║ Núcleo      ║ Uso     ║\n"
+    texto_nucleos += "╠═════════════╬═════════╣\n"
+    for idx, percent in enumerate(porcentagem, start=1):
+        texto_nucleos += f"║ Núcleo {idx:<2}    ║ {percent:>5.1f}%   ║\n"
+    texto_nucleos += "╚═════════════╩═════════╝"
+
+    # Exibe todos os dados
     print(f"""
-╔══════════════════════════════════════════════════╗
-        ✅ Dados Inseridos no banco de dados!
-╚══════════════════════════════════════════════════╝
-          
- 👤 Dono da máquina
+    ╔══════════════════════════════════════════════════╗
+                ✅ Dados Inseridos no banco de dados!
+    ╚══════════════════════════════════════════════════╝
+            
+    👤 Dono da máquina
     Hostname: {dono_maquina}
 
+    💻 CPU
+    ➤ Percentual de uso por núcleo:
+    {texto_nucleos}
 
- 💻 CPU
-   ➤ Porcentagem de uso: {porcentagem}%
-   
-""")
+    🧠 Memória RAM
+    ➤ GB Livre: {memoria_GB_free:.2f} GB
+    ➤ GB em Uso: {memoria_formatada_em_uso} GB
 
-    print(f"""
- 🧠 Memória RAM
-   ➤ GB Livre: {memoria_GB_free:.2f} GB
-   ➤ GB em Uso: {memoria_formatada_em_uso} GB
+    💾 Disco
+    ➤ Percentual de uso: {disco_percent:.1f}%
+    ➤ GB Livre: {disco_livre_gb:.2f} GB
+    ➤ GB em Uso: {disco_usado_formatado} GB
 
- 💾 Disco
-   ➤ Porcentagem de uso: {disco_percent}%
-   ➤ GB Livre: {disco_livre_gb}
-   ➤ GB em Uso: {disco_usado_formatado} GB
+    ═══════════════════════════════════════════════════
+    """)
 
- ══════════════════════════════════════════════════
-""")
+
 
     inserir_porcentagem_cpu(porcentagem, dono_maquina)
     inserir_dados_memoria(memoria_GB_free, memoria_usada_GB, dono_maquina)

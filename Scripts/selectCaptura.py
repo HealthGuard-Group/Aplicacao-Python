@@ -2,218 +2,211 @@ import psutil as p
 from mysql.connector import connect, Error
 from dotenv import load_dotenv
 import os
-import platform
+from collections import defaultdict
 
 load_dotenv()
 
 config = {
-  'user': os.getenv("USER"),
-  'password': os.getenv("PASSWORD"),
-  'host': os.getenv("HOST"),
-  'database': os.getenv("DATABASE")
+    'user': os.getenv("USER"),
+    'password': os.getenv("PASSWORD"),
+    'host': os.getenv("HOST"),
+    'database': os.getenv("DATABASE")
 }
 
+# Função para selecionar porcentagem de CPU
 def selecionar_porcentagem_cpu():
     try:
         db = connect(**config)
         if db.is_connected():
             print('Connected to MySQL server version -', db.server_info)
-            
             with db.cursor() as cursor:
-                query = """SELECT 
-u.nome              AS Usuario,
-e.razaoSocial       AS Empresa,
-m.marca             AS Maquina,
-m.sistemaOperacional AS SistemaOperacional,
-c.nome   AS Componente,
-CONCAT(cap.porcentagemDeUso, "%")          AS "Porcentagem EM USO",
-cap.dtCaptura       AS DataCaptura,
-cap.hostname
-FROM Usuario u
-JOIN Empresa e     ON u.fkEmpresa = e.idEmpresa
-JOIN Lote l        ON e.idEmpresa = l.fkEmpresa
-JOIN Maquina m     ON l.idLote = m.fkLote
-JOIN Componente c  ON m.idMaquina = c.fkMaquina
-LEFT JOIN Captura cap   ON c.idComponente = cap.fkComponente
-where c.nome = "Processador";"""
+                query = """
+                SELECT 
+                    u.nome AS Usuario,
+                    e.razaoSocial AS Empresa,
+                    m.marca AS Maquina,
+                    m.sistemaOperacional AS SistemaOperacional,
+                    c.nome AS Componente,
+                    n.numeroNucleo AS Nucleo,
+                    CONCAT(cap.porcentagemDeUso, "%") AS Percentual,
+                    cap.dtCaptura AS DataCaptura
+                FROM Usuario u
+                JOIN Empresa e ON u.fkEmpresa = e.idEmpresa
+                JOIN Lote l ON e.idEmpresa = l.fkEmpresa
+                JOIN Maquina m ON l.idLote = m.fkLote
+                JOIN Componente c ON m.idMaquina = c.fkMaquina
+                JOIN Nucleo n ON c.idComponente = n.fkComponente
+                LEFT JOIN Captura cap ON c.idComponente = cap.fkComponente AND n.idNucleo = cap.fkNucleo
+                WHERE c.nome = "Processador"
+                ORDER BY cap.dtCaptura DESC, n.numeroNucleo;
+                """
                 cursor.execute(query)
-                resultado = cursor.fetchall() 
-                
+                resultado = cursor.fetchall()
             cursor.close()
             db.close()
             return resultado
-    
     except Error as e:
-        print('Error to connect with MySQL -', e) 
-       
-        
-        
-resultadocpu = selecionar_porcentagem_cpu() 
+        print('Error to connect with MySQL -', e)
+        return []
 
+# Função para selecionar memória
 def selecionar_memoria():
     try:
         db = connect(**config)
         if db.is_connected():
-            db_info = db.server_info
-            print()
-            
             with db.cursor() as cursor:
-    
-                query = """SELECT 
-u.nome              AS Usuario,
-e.razaoSocial       AS Empresa,
-m.marca             AS Maquina,
-m.sistemaOperacional AS SistemaOperacional,
-c.nome   AS Componente,
-CONCAT(ROUND(cap.gbEmUso, 1), " GB")          AS "GigaBytes EM USO",
-CONCAT(ROUND(gbLivre, 2), " GB" )       AS "GigaBytes Livre",
-cap.dtCaptura       AS DataCaptura,
-cap.hostname
-FROM Usuario u
-JOIN Empresa e     ON u.fkEmpresa = e.idEmpresa
-JOIN Lote l        ON e.idEmpresa = l.fkEmpresa
-JOIN Maquina m     ON l.idLote = m.fkLote
-JOIN Componente c  ON m.idMaquina = c.fkMaquina
-LEFT JOIN Captura cap   ON c.idComponente = cap.fkComponente
-where c.nome = "Memoria RAM";;"""
-
-
+                query = """
+                SELECT 
+                    u.nome AS Usuario,
+                    e.razaoSocial AS Empresa,
+                    m.marca AS Maquina,
+                    m.sistemaOperacional AS SistemaOperacional,
+                    c.nome AS Componente,
+                    CONCAT(cap.gbLivre, " GB") AS MemoriaLivre,
+                    CONCAT(cap.gbEmUso, " GB") AS MemoriaEmUso,
+                    cap.dtCaptura AS DataCaptura
+                FROM Usuario u
+                JOIN Empresa e ON u.fkEmpresa = e.idEmpresa
+                JOIN Lote l ON e.idEmpresa = l.fkEmpresa
+                JOIN Maquina m ON l.idLote = m.fkLote
+                JOIN Componente c ON m.idMaquina = c.fkMaquina
+                LEFT JOIN Captura cap ON c.idComponente = cap.fkComponente
+                WHERE c.nome = "Memória RAM"
+                ORDER BY cap.dtCaptura DESC;
+                """
                 cursor.execute(query)
-                resultado = cursor.fetchall() 
-                
+                resultado = cursor.fetchall()
             cursor.close()
             db.close()
             return resultado
-    
     except Error as e:
-        print('Error to connect with MySQL -', e) 
-        
-        
-resultadomemoria = selecionar_memoria()
+        print('Error to connect with MySQL -', e)
+        return []
 
+# Função para selecionar disco
 def selecionar_disco():
     try:
         db = connect(**config)
         if db.is_connected():
-            db_info = db.server_info
-            print()
-            
             with db.cursor() as cursor:
-    
-                query = """SELECT 
-u.nome              AS Usuario,
-e.razaoSocial       AS Empresa,
-m.marca             AS Maquina,
-m.sistemaOperacional AS SistemaOperacional,
-c.nome   AS Componente,
-CONCAT(cap.porcentagemDeUso, "%")          AS "Porcentagem EM USO",
-CONCAT(ROUND(cap.gbEmUso, 1), " GB")          AS "GigaBytes EM USO",
-CONCAT(ROUND(cap.gbLivre, 2), " GB" )       AS "GigaBytes Livre",
-cap.dtCaptura       AS DataCaptura,
-cap.hostname12
-FROM Usuario u
-JOIN Empresa e     ON u.fkEmpresa = e.idEmpresa
-JOIN Lote l        ON e.idEmpresa = l.fkEmpresa
-JOIN Maquina m     ON l.idLote = m.fkLote
-JOIN Componente c  ON m.idMaquina = c.fkMaquina
-LEFT JOIN Captura cap   ON c.idComponente = cap.fkComponente
-where c.nome = "Disco Rígido";
-;;"""
-
-
+                query = """
+                SELECT 
+                    u.nome AS Usuario,
+                    e.razaoSocial AS Empresa,
+                    m.marca AS Maquina,
+                    m.sistemaOperacional AS SistemaOperacional,
+                    c.nome AS Componente,
+                    CONCAT(ROUND(cap.gbLivre,2), " GB") AS GBLivre,
+                    CONCAT(ROUND(cap.gbEmUso,2), " GB") AS GBEmUso,
+                    CONCAT(cap.porcentagemDeUso, "%") AS Percentual,
+                    cap.dtCaptura AS DataCaptura
+                FROM Usuario u
+                JOIN Empresa e ON u.fkEmpresa = e.idEmpresa
+                JOIN Lote l ON e.idEmpresa = l.fkEmpresa
+                JOIN Maquina m ON l.idLote = m.fkLote
+                JOIN Componente c ON m.idMaquina = c.fkMaquina
+                LEFT JOIN Captura cap ON c.idComponente = cap.fkComponente
+                WHERE c.nome = "Disco Rígido"
+                ORDER BY cap.dtCaptura DESC;
+                """
                 cursor.execute(query)
-                resultado = cursor.fetchall() 
-                
+                resultado = cursor.fetchall()
             cursor.close()
             db.close()
             return resultado
-    
     except Error as e:
-        print('Error to connect with MySQL -', e) 
-        
-        
+        print('Error to connect with MySQL -', e)
+        return []
+
+# Captura dos dados
+resultadocpu = selecionar_porcentagem_cpu()
+resultadomemoria = selecionar_memoria()
 resultadodisco = selecionar_disco()
 
+# Organiza os dados de CPU por Data/Hora
+capturas_cpu = defaultdict(list)
+for usuario, empresa, maquina, so, componente, nucleo, percentual, dtCaptura in resultadocpu:
+    capturas_cpu[dtCaptura].append((nucleo, percentual, usuario, empresa, maquina, so, componente))
+
+# Loop do menu
 loop = True
-tamanho_vetormemoria = len(resultadomemoria)
-tamanho_vetorcpu = len(resultadomemoria)
-tamanho_vetordisco = len(resultadodisco)
-
-while loop == True:
-
-    decisao = int(input("""
+while loop:
+    try:
+        decisao = int(input("""
  ╔════════════════════════════════════════════╗
 ║              🖥  MENU DO CLIENTE            ║
 ╠════════════════════════════════════════════╣
-║ ⿡  Visualizar Porcentagem do uso da CPU    ║
-║ ⿢  Visualizar Dados de Memória             ║
-║ ⿣  Visualizar Dados do Disco               ║
-║ ⿠  Sair                                    ║
+║ 1  Visualizar Porcentagem do uso da CPU    ║
+║ 2  Visualizar Dados de Memória             ║
+║ 3  Visualizar Dados do Disco               ║
+║ 4  Sair                                    ║
 ╚════════════════════════════════════════════╝
       """))
+    except ValueError:
+        print("Por favor, digite apenas números de 1 a 4")
+        continue
 
     if decisao == 1:
-        for i in range(tamanho_vetorcpu):
-           usuario, empresa, maquina, so, componente, cpu, hora, hostname = resultadocpu[i]
-           print(f"""        
+        for dt, nucleos in capturas_cpu.items():
+            usuario, empresa, maquina, so, componente = nucleos[0][2:]
+            print(f"""        
 ============================================================
                 📊 RELATÓRIO DA CPU
- ============================================================
- 👤 Usuário:      {usuario}
- 👤 Hostname:     {hostname}
- 🏢 Empresa:      {empresa}
- 💻 Máquina:      {maquina}
- 🖥  Sistema:      {so}
- 🔧 Componente:   {componente}
+============================================================""")
+            print(f"👤 Usuário: {usuario}")
+            print(f"🏢 Empresa: {empresa}")
+            print(f"💻 Máquina: {maquina}")
+            print(f"🖥  Sistema: {so}")
+            print(f"🔧 Componente: {componente}")
+            print(f"🕒 Data/Hora da Captura: {dt}\n")
 
- 📈 Percentual de uso CPU: {cpu}
+            for numeroNucleo, percentual, *_ in nucleos:
+                print(f"Núcleo {numeroNucleo}: {percentual}")
 
- 🕒 Data/Hora da Captura: {hora}
+            print("============================================================\n")
+
+    elif decisao == 2:
+        for linha in resultadomemoria:
+            usuario, empresa, maquina, so, componente, memoria_livre, memoria_em_uso, hora = linha
+            print(f"""
+============================================================
+                📊 RELATÓRIO DA MEMÓRIA
+============================================================
+👤 Usuário:      {usuario}
+🏢 Empresa:      {empresa}
+💻 Máquina:      {maquina}
+🖥  Sistema:      {so}
+🔧 Componente:   {componente}
+
+📂 GB livre da Memória RAM: {memoria_livre}
+💾 GB em uso da Memória: {memoria_em_uso}
+
+🕒 Data/Hora da Captura: {hora}
 ============================================================
 """)
-    if decisao == 2:
-        for i in range(tamanho_vetormemoria):
-            usuario, empresa, maquina, so, componente, memoria_livre, memoria_em_uso, hora,  hostname = resultadomemoria[i]
-            print(f"""        
- ============================================================
-                📊 RELATÓRIO DA MEMÓRIA
- ============================================================
- 👤 Usuário:      {usuario}
- 👤 Hostname:     {hostname}
- 🏢 Empresa:      {empresa}
- 💻 Máquina:      {maquina}
- 🖥  Sistema:      {so}
- 🔧 Componente:   {componente}
 
- 📂 GB livre da Memória RAM: {memoria_livre}
- 💾 GB em uso da Memóra: {memoria_em_uso}
-
- 🕒 Data/Hora da Captura: {hora}
+    elif decisao == 3:
+        for linha in resultadodisco:
+            usuario, empresa, maquina, so, componente, gblivre, gbuso, percent, hora = linha
+            print(f"""
 ============================================================
-""") 
- 
-    if decisao == 3:
-        for i in range(tamanho_vetordisco):
-            usuario, empresa, maquina, so, componente, gblivre, gbuso, percent,  hora,  hostname = resultadodisco[i]
-            print(f"""        
- ============================================================
                 📊 RELATÓRIO DO DISCO
- ============================================================
- 👤 Usuário:      {usuario}
- 👤 Hostname:     {hostname}
- 🏢 Empresa:      {empresa}
- 💻 Máquina:      {maquina}
- 🖥  Sistema:      {so}
- 🔧 Componente:   {componente}
-
- 📂 GB livre do disco: {gblivre}
- 💾 GB em uso do disco: {gbuso}
- 📈 Percentual em Uso: {percent}
-
- 🕒 Data/Hora da Captura: {hora}
 ============================================================
-""") 
-    if decisao == 0:
+👤 Usuário:      {usuario}
+🏢 Empresa:      {empresa}
+💻 Máquina:      {maquina}
+🖥  Sistema:      {so}
+🔧 Componente:   {componente}
+
+📂 GB livre do disco: {gblivre}
+💾 GB em uso do disco: {gbuso}
+📈 Percentual em Uso: {percent}
+
+🕒 Data/Hora da Captura: {hora}
+============================================================
+""")
+
+    elif decisao == 4:
         loop = False
         print("""
 ╔════════════════════════════════════════════╗
@@ -223,4 +216,3 @@ while loop == True:
 ║ Tenha um ótimo dia! 🌟                     ║
 ╚════════════════════════════════════════════╝
 """)
-                    
