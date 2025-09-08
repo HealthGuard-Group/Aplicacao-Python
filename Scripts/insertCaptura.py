@@ -138,12 +138,12 @@ for i in range(30):
 
 
    # Formata os núcleos da CPU de forma bonita
-    texto_nucleos = "╔═════════════╦═════════╗\n"
-    texto_nucleos += "║ Núcleo      ║ Uso     ║\n"
+    texto_nucleos = ""
+    texto_nucleos += "Núcleo       Uso     \n"
     texto_nucleos += "╠═════════════╬═════════╣\n"
     for idx, percent in enumerate(porcentagem, start=1):
-        texto_nucleos += f"║ Núcleo {idx:<2}    ║ {percent:>5.1f}%   ║\n"
-    texto_nucleos += "╚═════════════╩═════════╝"
+        texto_nucleos += f" Núcleo {idx}     {percent}%   \n"
+  
 
     # Exibe todos os dados
     print(f"""
@@ -156,6 +156,7 @@ for i in range(30):
 
     💻 CPU
     ➤ Percentual de uso por núcleo:
+
     {texto_nucleos}
 
     🧠 Memória RAM
