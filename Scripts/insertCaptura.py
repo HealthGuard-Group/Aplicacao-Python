@@ -177,4 +177,4 @@ for i in range(30):
     inserir_dados_memoria(memoria_GB_free, memoria_usada_GB, dono_maquina)
     inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado, dono_maquina)
 
-    time.sleep(2)
+    time.sleep(5)
