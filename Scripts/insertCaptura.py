@@ -15,7 +15,7 @@ config = {
       'database': os.getenv("DATABASE")
     }
 
-def inserir_porcentagem_cpu(porcentagem, donoMaquina):
+def inserir_porcentagem_cpu(porcentagem, dono_maquina):
     try:
         db = connect(**config)
         if db.is_connected():
@@ -26,18 +26,11 @@ def inserir_porcentagem_cpu(porcentagem, donoMaquina):
                 resultado_index = cursor.fetchall()
 
                 index_cpu = resultado_index[0][0]
-
-                querySelect = "SELECT idNucleo FROM nucleo;"
-                cursor.execute(querySelect)
-                resultado_select = cursor.fetchall()
     
-                for ax, i in enumerate(resultado_select):
-                    fk_nucleo = i[0]
-                    percent = porcentagem[ax]
-                    query = "INSERT INTO healthguard.captura (fkComponente, fkNucleo, porcentagemDeUso, hostname, dtCaptura) VALUES (%s, %s, %s, %s, %s)"
-                    value = (index_cpu, fk_nucleo, percent, dono_maquina, datetime.datetime.now())
-                    cursor.execute(query, value)
-                
+                query = "INSERT INTO healthguard.captura (fkComponente, porcentagemDeUso, hostname, dtCaptura) VALUES (%s, %s, %s, %s)"
+                value = (index_cpu, porcentagem, dono_maquina, datetime.datetime.now())
+                cursor.execute(query, value)
+                   
                 db.commit()    
             db.close()
    
@@ -133,17 +126,8 @@ for i in range(30):
 
 
    
-    porcentagem = p.cpu_percent(interval=1, percpu=True)
+    porcentagem = p.cpu_percent(interval=1, percpu=False)
     dono_maquina = platform.node()
-
-
-   # Formata os núcleos da CPU de forma bonita
-    texto_nucleos = ""
-    texto_nucleos += "Núcleo       Uso     \n"
-    texto_nucleos += "╠═════════════╬═════════╣\n"
-    for idx, percent in enumerate(porcentagem, start=1):
-        texto_nucleos += f" Núcleo {idx}     {percent}%   \n"
-  
 
     # Exibe todos os dados
     print(f"""
@@ -153,11 +137,6 @@ for i in range(30):
             
     👤 Dono da máquina
     Hostname: {dono_maquina}
-
-    💻 CPU
-    ➤ Percentual de uso por núcleo:
-
-    {texto_nucleos}
 
     🧠 Memória RAM
     ➤ GB Livre: {memoria_GB_free:.2f} GB

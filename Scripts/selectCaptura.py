@@ -21,13 +21,12 @@ def selecionar_porcentagem_cpu():
             print('Connected to MySQL server version -', db.server_info)
             with db.cursor() as cursor:
                 query = """
-                SELECT 
+                 SELECT 
                     u.nome AS Usuario,
                     e.razaoSocial AS Empresa,
                     m.marca AS Maquina,
                     m.sistemaOperacional AS SistemaOperacional,
                     c.nome AS Componente,
-                    n.numeroNucleo AS Nucleo,
                     CONCAT(cap.porcentagemDeUso, "%") AS Percentual,
                     cap.dtCaptura AS DataCaptura
                 FROM Usuario u
@@ -35,10 +34,9 @@ def selecionar_porcentagem_cpu():
                 JOIN Lote l ON e.idEmpresa = l.fkEmpresa
                 JOIN Maquina m ON l.idLote = m.fkLote
                 JOIN Componente c ON m.idMaquina = c.fkMaquina
-                JOIN Nucleo n ON c.idComponente = n.fkComponente
-                LEFT JOIN Captura cap ON c.idComponente = cap.fkComponente AND n.idNucleo = cap.fkNucleo
+                LEFT JOIN Captura cap ON c.idComponente = cap.fkComponente
                 WHERE c.nome = "Processador"
-                ORDER BY cap.dtCaptura DESC, n.numeroNucleo;
+                ORDER BY cap.dtCaptura DESC;
                 """
                 cursor.execute(query)
                 resultado = cursor.fetchall()
@@ -125,8 +123,8 @@ resultadodisco = selecionar_disco()
 
 # Organiza os dados de CPU por Data/Hora
 capturas_cpu = defaultdict(list)
-for usuario, empresa, maquina, so, componente, nucleo, percentual, dtCaptura in resultadocpu:
-    capturas_cpu[dtCaptura].append((nucleo, percentual, usuario, empresa, maquina, so, componente))
+for usuario, empresa, maquina, so, componente, percentual, dtCaptura in resultadocpu:
+    capturas_cpu[dtCaptura].append((percentual, usuario, empresa, maquina, so, componente))
 
 # Loop do menu
 loop = True
@@ -147,8 +145,8 @@ while loop:
         continue
 
     if decisao == 1:
-        for dt, nucleos in capturas_cpu.items():
-            usuario, empresa, maquina, so, componente = nucleos[0][2:]
+       for dt, registros in capturas_cpu.items():
+        for percentual, usuario, empresa, maquina, so, componente in registros:
             print(f"""        
 ============================================================
                 📊 RELATÓRIO DA CPU
@@ -159,9 +157,6 @@ while loop:
             print(f"🖥  Sistema: {so}")
             print(f"🔧 Componente: {componente}")
             print(f"🕒 Data/Hora da Captura: {dt}\n")
-
-            for numeroNucleo, percentual, *_ in nucleos:
-                print(f"Núcleo {numeroNucleo}: {percentual}")
 
             print("============================================================\n")
 
