@@ -22,10 +22,8 @@ def inserir_porcentagem_cpu(porcentagem, dono_maquina):
             db_info = db.server_info
 
             with db.cursor() as cursor:
-                cursor.execute("SELECT idComponente FROM Componente WHERE nome LIKE 'Processador';")
-                resultado_index = cursor.fetchall()
-
-                index_cpu = resultado_index[0][0]
+                
+                index_cpu = 3
     
                 query = "INSERT INTO healthguard.captura (fkComponente, porcentagemDeUso, hostname, dtCaptura) VALUES (%s, %s, %s, %s)"
                 value = (index_cpu, porcentagem, dono_maquina, datetime.datetime.now())
@@ -43,10 +41,8 @@ def inserir_dados_memoria(memoria_GB_free, memoria_usada_GB, dono_maquina):
         db = connect(**config)
         if db.is_connected():
             with db.cursor() as cursor:
-                cursor.execute("SELECT idComponente FROM Componente WHERE nome LIKE 'Memória RAM';")
-                resultado_index = cursor.fetchall()
 
-                id_memoria = resultado_index[0][0]
+                id_memoria = 1
 
                 query = "INSERT INTO healthguard.captura (fkComponente, gbLivre, gbEmUso, hostname, dtCaptura) VALUES (%s, %s, %s, %s, %s)"
                 value = (id_memoria, memoria_GB_free, memoria_usada_GB, dono_maquina, datetime.datetime.now())
@@ -63,10 +59,8 @@ def inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado, do
         db = connect(**config)
         if db.is_connected():
             with db.cursor() as cursor:
-                cursor.execute("SELECT idComponente FROM Componente WHERE nome LIKE 'Disco Rígido';")
-                resultado_id = cursor.fetchall()
-
-                id_disco = resultado_id[0][0]
+                
+                id_disco = 2
                 query = "INSERT INTO healthguard.captura (fkComponente, gbLivre, gbEmUso, porcentagemDeUso, hostname,dtCaptura) VALUES (%s, %s, %s, %s, %s, %s)"
                 value = (id_disco,  disco_livre_gb, disco_usado_formatado, disco_percent, dono_maquina, datetime.datetime.now())
                 cursor.execute(query, value)
@@ -137,6 +131,10 @@ for i in range(30):
             
     👤 Dono da máquina
     Hostname: {dono_maquina}
+
+    ⚙️  CPU
+    ➤ Porcentagem de uso: {porcentagem}%
+
 
     🧠 Memória RAM
     ➤ GB Livre: {memoria_GB_free:.2f} GB

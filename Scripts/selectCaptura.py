@@ -2,7 +2,7 @@ import psutil as p
 from mysql.connector import connect, Error
 from dotenv import load_dotenv
 import os
-from collections import defaultdict
+
 
 load_dotenv()
 
@@ -121,16 +121,11 @@ resultadocpu = selecionar_porcentagem_cpu()
 resultadomemoria = selecionar_memoria()
 resultadodisco = selecionar_disco()
 
-# Organiza os dados de CPU por Data/Hora
-capturas_cpu = defaultdict(list)
-for usuario, empresa, maquina, so, componente, percentual, dtCaptura in resultadocpu:
-    capturas_cpu[dtCaptura].append((percentual, usuario, empresa, maquina, so, componente))
 
 # Loop do menu
 loop = True
 while loop:
-    try:
-        decisao = int(input("""
+    decisao = int(input("""
  ╔════════════════════════════════════════════╗
 ║              🖥  MENU DO CLIENTE            ║
 ╠════════════════════════════════════════════╣
@@ -140,25 +135,25 @@ while loop:
 ║ 4  Sair                                    ║
 ╚════════════════════════════════════════════╝
       """))
-    except ValueError:
-        print("Por favor, digite apenas números de 1 a 4")
-        continue
-
+   
     if decisao == 1:
-       for dt, registros in capturas_cpu.items():
-        for percentual, usuario, empresa, maquina, so, componente in registros:
-            print(f"""        
+        for linha in resultadocpu:
+            usuario, empresa, maquina, so, componente, cpupercent, hora = linha
+            print(f"""
 ============================================================
                 📊 RELATÓRIO DA CPU
-============================================================""")
-            print(f"👤 Usuário: {usuario}")
-            print(f"🏢 Empresa: {empresa}")
-            print(f"💻 Máquina: {maquina}")
-            print(f"🖥  Sistema: {so}")
-            print(f"🔧 Componente: {componente}")
-            print(f"🕒 Data/Hora da Captura: {dt}\n")
+============================================================
+👤 Usuário:      {usuario}
+🏢 Empresa:      {empresa}
+💻 Máquina:      {maquina}
+🖥  Sistema:      {so}
+🔧 Componente:   {componente}
 
-            print("============================================================\n")
+⚙️  Porcentagem de uso: {cpupercent}
+
+🕒 Data/Hora da Captura: {hora}
+============================================================
+""")
 
     elif decisao == 2:
         for linha in resultadomemoria:
@@ -211,3 +206,4 @@ while loop:
 ║ Tenha um ótimo dia! 🌟                     ║
 ╚════════════════════════════════════════════╝
 """)
+
