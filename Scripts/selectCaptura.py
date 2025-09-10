@@ -116,7 +116,7 @@ def selecionar_disco():
         print('Error to connect with MySQL -', e)
         return []
 
-# Captura dos dados
+
 resultadocpu = selecionar_porcentagem_cpu()
 resultadomemoria = selecionar_memoria()
 resultadodisco = selecionar_disco()

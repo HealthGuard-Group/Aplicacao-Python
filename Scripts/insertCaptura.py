@@ -73,53 +73,33 @@ def inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado, do
 
 for i in range(30):
  
+ # HOSTNAME DA MAQUINA
     dono_maquina = platform.node()
 
+# DADOS DA MEMORIA
   
 
-        
-    memoria = p.virtual_memory() ## captura dados e métricas da memoria
-    memoria_livre = memoria.available   ## memoria livre em bytes
-    memoria_GB_free = memoria_livre / (1024**3)   ## memoria convertida pra GB
-    memoria_formatada = f"{memoria_GB_free:.2f} GB" ## memoria formatada com 2 casas decimais
+    memoria = p.virtual_memory() # CAPTURA TODAS AS METRICAS DA MEMORIA
+    memoria_livre = memoria.available  # MEMORIA LIVRE EM BYTES
+    memoria_GB_free = memoria_livre / (1024**3)   # CONVERTE OS BYTES DA MEMORIA LIVRE EM GB
+    memoria_formatada = f"{memoria_GB_free:.2f} GB" #  FORMATA COM 2 CADAS DECIMAIS
    
-    memoria_total_GB = memoria.total / (1024**3) # Captura memoria TOTAL
+    memoria_total_GB = memoria.total / (1024**3) # CAPTURA MEMORIA TOTAL
     memoria_livre_GB = memoria.available / (1024**3) # Memória livre em GB, Captura memoria livre
-    memoria_usada_GB = memoria_total_GB - memoria_livre_GB # faz oepração aritmetica para saber o GB EM USO
-    memoria_formatada_em_uso = f'{memoria_usada_GB:.2f}'
+    memoria_usada_GB = memoria_total_GB - memoria_livre_GB # Faz a conta: total - livre = usada (quanto de memória está ocupada).
+    memoria_formatada_em_uso = f'{memoria_usada_GB:.2f}' # Formata a memoria usada em gb com 2 casas decimais
 
-    # Captura o uso do disco da partição raiz '/'
-    disco_objeto = p.disk_usage('/')
-    disco_percent =  p.disk_usage('/').percent
+# DADOS DO DISCO
 
-     
+    disco_objeto = p.disk_usage('/')  # Captura o uso do disco da partição raiz '/'
+    disco_percent =  p.disk_usage('/').percent # Captura a porcentagem de uso total do disco (quanto está ocupado)
     disco_livre_bytes = disco_objeto.free # Espaço livre em bytes
-    disco_livre_gb = disco_livre_bytes / (1024**3) # Espaço livre em GB
-    porcentagem_livre = disco_objeto.free / disco_objeto.total * 100 # Porcentagem de espaço livre
-    disco_usado_gb = (disco_objeto.total - disco_livre_bytes) / (1024**3) # disco usado captura disco usado
-
+    disco_livre_gb = disco_livre_bytes / (1024**3) # Espaço livre em GB converte de bytes para GB
+    porcentagem_livre = disco_objeto.free / disco_objeto.total * 100 # Porcentagem de espaço livre do disco
+    disco_usado_gb = (disco_objeto.total - disco_livre_bytes) / (1024**3) # Faz a conta: total - livre = usado e converte para GB.
     disco_usado_formatado = f'{disco_usado_gb:.2f}'
 
-    memoria = p.virtual_memory() ## captura dados e métricas da memoria
-    memoria_livre = memoria.available   ## memoria livre em bytes
-    memoria_GB_free = memoria_livre / (1024**3)   ## memoria convertida pra GB
-    memoria_formatada = f"{memoria_GB_free:.2f} GB" ## memoria formatada com 2 casas decimais
-    memoria_total_GB = memoria.total / (1024**3) # Captura memoria TOTAL
-    memoria_livre_GB = memoria.available / (1024**3) # Memória livre em GB
-    memoria_usada_GB = memoria_total_GB - memoria_livre_GB # GB em uso
-    memoria_formatada_em_uso = f'{memoria_usada_GB:.2f}'
-
-    # Captura o uso do disco da partição raiz '/'
-    disco_objeto = p.disk_usage('/')
-    disco_percent = disco_objeto.percent
-    disco_livre_bytes = disco_objeto.free
-    disco_livre_gb = disco_livre_bytes / (1024**3)
-    disco_usado_gb = (disco_objeto.total - disco_livre_bytes) / (1024**3)
-    disco_usado_formatado = f'{disco_usado_gb:.2f}'
-
-
-
-   
+    
     porcentagem = p.cpu_percent(interval=1, percpu=False)
     dono_maquina = platform.node()
 

@@ -1,3 +1,5 @@
-import psutil
+import psutil as p
 
-print(psutil.cpu_percent(interval=1, percpu=False))
+
+porcentagem = p.cpu_percent(interval=1, percpu=False)
+print(porcentagem)
