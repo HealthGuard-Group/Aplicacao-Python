@@ -34,7 +34,7 @@ def selecionar_porcentagem_cpu():
                 JOIN Lote l ON e.idEmpresa = l.fkEmpresa
                 JOIN Maquina m ON l.idLote = m.fkLote
                 JOIN Componente c ON m.idMaquina = c.fkMaquina
-                LEFT JOIN Captura cap ON c.idComponente = cap.fkComponente
+                LEFT JOIN aCaptura cap ON c.idComponente = cap.fkComponente
                 WHERE c.nome = "Processador"
                 ORDER BY cap.dtCaptura DESC;
                 """

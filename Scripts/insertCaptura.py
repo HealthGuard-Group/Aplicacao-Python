@@ -149,7 +149,6 @@ for i in range(30):
     """)
 
 
-
     inserir_porcentagem_cpu(porcentagem, dono_maquina)
     inserir_dados_memoria(memoria_GB_free, memoria_usada_GB, dono_maquina)
     inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado, dono_maquina)
