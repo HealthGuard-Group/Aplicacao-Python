@@ -71,7 +71,7 @@ def inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado, do
         print('Erro ao conectar com MySQL -', e)         
 
 
-for i in range(30):
+while True:
  
  # HOSTNAME DA MAQUINA
     dono_maquina = platform.node()
