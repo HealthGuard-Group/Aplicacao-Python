@@ -5,6 +5,8 @@ import os
 import datetime
 import time
 import platform
+from tabulate import tabulate
+
 
 load_dotenv()
 
@@ -99,34 +101,22 @@ while True:
     porcentagem = p.cpu_percent(interval=1, percpu=False)
     
 
-    # Exibe todos os dados
-    print(f"""
-    ╔══════════════════════════════════════════════════╗
-                ✅ Dados Inseridos no banco de dados!
-    ╚══════════════════════════════════════════════════╝
-            
-    👤 Dono da máquina
-    Hostname: {dono_maquina}
+    captura = [
+        ["Hostname", dono_maquina],
+        ["CPU % (USO)", f"{porcentagem}%"],
+        ["Memória Livre (GB)", f"{memoria_GB_free:.2f} GB"],
+        ["Memória em Uso (GB)", f"{memoria_formatada_em_uso} GB"],
+        ["Disco % (USO)", f"{disco_percent:.1f}%"],
+        ["Disco Livre (GB)", f"{disco_livre_gb:.2f} GB"],
+        ["Disco em Uso (GB)", f"{disco_usado_formatado} GB"]
+    ]
 
-    ⚙️  CPU
-    ➤ Porcentagem de uso: {porcentagem}%
-
-
-    🧠 Memória RAM
-    ➤ GB Livre: {memoria_GB_free:.2f} GB
-    ➤ GB em Uso: {memoria_formatada_em_uso} GB
-
-    💾 Disco
-    ➤ Percentual de uso: {disco_percent:.1f}%
-    ➤ GB Livre: {disco_livre_gb:.2f} GB
-    ➤ GB em Uso: {disco_usado_formatado} GB
-
-    ═══════════════════════════════════════════════════
-    """)
-
+    
+    print(tabulate(captura, headers=["Componente", "Valor"], tablefmt="fancy_grid"))
+    
 
     inserir_porcentagem_cpu(porcentagem, dono_maquina)
     inserir_dados_memoria(memoria_GB_free, memoria_usada_GB, dono_maquina)
     inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado, dono_maquina)
 
-    time.sleep(5)
+    time.sleep(4)

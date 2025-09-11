@@ -2,6 +2,7 @@ import psutil as p
 from mysql.connector import connect, Error
 from dotenv import load_dotenv
 import os
+from tabulate import tabulate
 
 
 load_dotenv()
@@ -21,22 +22,7 @@ def selecionar_porcentagem_cpu():
             print('Connected to MySQL server version -', db.server_info)
             with db.cursor() as cursor:
                 query = """ 
-                SELECT 
-                    u.nome AS Usuario,
-                    c.nome AS Central,
-                    m.marca AS Maquina,
-                    m.sistemaOperacional AS SistemaOperacional,
-                    co.nome AS Componente,
-                    CONCAT(cap.porcentagemDeUso, "%") AS Percentual,
-                    cap.dtCaptura AS DataCaptura
-                FROM Usuario u
-                JOIN CentralAtendimento c ON u.fkCentral = c.idCentral
-                JOIN Maquina m ON m.fkCentral = c.idCentral
-                JOIN Componente co ON m.idMaquina = co.fkMaquina
-                LEFT JOIN Captura cap ON co.idComponente = cap.fkComponente
-                WHERE co.nome = "Processador"
-                ORDER BY cap.dtCaptura DESC;
-                """
+               select * from vw_cpu; """
                 cursor.execute(query)
                 resultado = cursor.fetchall()
             cursor.close()
@@ -53,23 +39,7 @@ def selecionar_memoria():
         if db.is_connected():
             with db.cursor() as cursor:
                 query = """
-                SELECT 
-                    u.nome AS Usuario,
-                    c.nome AS Central,
-                    m.marca AS Maquina,
-                    m.sistemaOperacional AS SistemaOperacional,
-                    co.nome AS Componente,
-                    CONCAT(cap.gbLivre, " GB") AS MemoriaLivre,
-                    CONCAT(cap.gbEmUso, " GB") AS MemoriaEmUso,
-                    cap.dtCaptura AS DataCaptura
-                FROM Usuario u
-                JOIN CentralAtendimento c ON u.fkCentral = c.idCentral
-                JOIN Maquina m ON m.fkCentral = c.idCentral
-                JOIN Componente co ON m.idMaquina = co.fkMaquina
-                LEFT JOIN Captura cap ON co.idComponente = cap.fkComponente
-                WHERE co.nome = "Memória RAM"
-                ORDER BY cap.dtCaptura DESC;
-                """
+                	select * from vw_memoria_ram;"""
                 cursor.execute(query)
                 resultado = cursor.fetchall()
             cursor.close()
@@ -85,25 +55,7 @@ def selecionar_disco():
         db = connect(**config)
         if db.is_connected():
             with db.cursor() as cursor:
-                query = """
-                SELECT 
-                    u.nome AS Usuario,
-                    c.nome AS Central,
-                    m.marca AS Maquina,
-                    m.sistemaOperacional AS SistemaOperacional,
-                    c.nome AS Componente,
-                    CONCAT(ROUND(cap.gbLivre,2), " GB") AS GBLivre,
-                    CONCAT(ROUND(cap.gbEmUso,2), " GB") AS GBEmUso,
-                    CONCAT(cap.porcentagemDeUso, "%") AS Percentual,
-                    cap.dtCaptura AS DataCaptura
-                FROM Usuario u
-                JOIN CentralAtendimento c ON u.fkCentral = c.idCentral
-                JOIN Maquina m ON m.fkCentral = c.idCentral
-                JOIN Componente co ON m.idMaquina = co.fkMaquina
-                LEFT JOIN Captura cap ON co.idComponente = cap.fkComponente
-                WHERE co.nome = "Disco Rígido"
-                ORDER BY cap.dtCaptura DESC;
-                """
+                query = """select * from vw_disco_rigido;"""
                 cursor.execute(query)
                 resultado = cursor.fetchall()
             cursor.close()
@@ -119,7 +71,8 @@ resultadomemoria = selecionar_memoria()
 resultadodisco = selecionar_disco()
 
 
-# Loop do menu
+
+
 loop = True
 while loop:
     decisao = int(input("""
@@ -134,64 +87,25 @@ while loop:
       """))
    
     if decisao == 1:
-        for linha in resultadocpu:
-            usuario, empresa, maquina, so, componente, cpupercent, hora = linha
-            print(f"""
-============================================================
-                📊 RELATÓRIO DA CPU
-============================================================
-👤 Usuário:      {usuario}
-🏢 Empresa:      {empresa}
-💻 Máquina:      {maquina}
-🖥  Sistema:      {so}
-🔧 Componente:   {componente}
-
-⚙️  Porcentagem de uso: {cpupercent}
-
-🕒 Data/Hora da Captura: {hora}
-============================================================
-""")
+        if resultadocpu:
+            headers = ["Usuário", "Empresa", "Máquina", "Sistema", "Componente", "CPU %", "Data/Hora", "Hostname"]
+            print(tabulate(resultadocpu, headers=headers, tablefmt="fancy_grid"))
+        else:
+            print("Nenhum dado encontrado.")
 
     elif decisao == 2:
-        for linha in resultadomemoria:
-            usuario, empresa, maquina, so, componente, memoria_livre, memoria_em_uso, hora = linha
-            print(f"""
-============================================================
-                📊 RELATÓRIO DA MEMÓRIA
-============================================================
-👤 Usuário:      {usuario}
-🏢 Empresa:      {empresa}
-💻 Máquina:      {maquina}
-🖥  Sistema:      {so}
-🔧 Componente:   {componente}
-
-📂 GB livre da Memória RAM: {memoria_livre}
-💾 GB em uso da Memória: {memoria_em_uso}
-
-🕒 Data/Hora da Captura: {hora}
-============================================================
-""")
+        if resultadomemoria:
+            headers = ["Usuário", "Empresa", "Máquina", "Sistema", "Componente", "Memória Livre", "Memória em Uso", "Data/Hora", "Hostname"]
+            print(tabulate(resultadomemoria, headers=headers, tablefmt="fancy_grid"))
+        else:
+            print("Nenhum dado encontrado.")
 
     elif decisao == 3:
-        for linha in resultadodisco:
-            usuario, empresa, maquina, so, componente, gblivre, gbuso, percent, hora = linha
-            print(f"""
-============================================================
-                📊 RELATÓRIO DO DISCO
-============================================================
-👤 Usuário:      {usuario}
-🏢 Empresa:      {empresa}
-💻 Máquina:      {maquina}
-🖥  Sistema:      {so}
-🔧 Componente:   {componente}
-
-📂 GB livre do disco: {gblivre}
-💾 GB em uso do disco: {gbuso}
-📈 Percentual em Uso: {percent}
-
-🕒 Data/Hora da Captura: {hora}
-============================================================
-""")
+        if resultadodisco:
+            headers = ["Usuário", "Empresa", "Máquina", "Sistema", "Componente", "GB Livre", "GB em Uso", "% Uso", "Data/Hora", "Hostname"]
+            print(tabulate(resultadodisco, headers=headers, tablefmt="fancy_grid"))
+        else:
+            print("Nenhum dado encontrado.")
 
     elif decisao == 4:
         loop = False
@@ -203,4 +117,6 @@ while loop:
 ║ Tenha um ótimo dia! 🌟                     ║
 ╚════════════════════════════════════════════╝
 """)
+    else:
+        print("Opção inválida, tente novamente.")
 
