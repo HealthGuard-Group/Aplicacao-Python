@@ -20,22 +20,21 @@ def selecionar_porcentagem_cpu():
         if db.is_connected():
             print('Connected to MySQL server version -', db.server_info)
             with db.cursor() as cursor:
-                query = """
-                 SELECT 
+                query = """ 
+                SELECT 
                     u.nome AS Usuario,
-                    e.razaoSocial AS Empresa,
+                    c.nome AS Central,
                     m.marca AS Maquina,
                     m.sistemaOperacional AS SistemaOperacional,
-                    c.nome AS Componente,
+                    co.nome AS Componente,
                     CONCAT(cap.porcentagemDeUso, "%") AS Percentual,
                     cap.dtCaptura AS DataCaptura
                 FROM Usuario u
-                JOIN Empresa e ON u.fkEmpresa = e.idEmpresa
-                JOIN Lote l ON e.idEmpresa = l.fkEmpresa
-                JOIN Maquina m ON l.idLote = m.fkLote
-                JOIN Componente c ON m.idMaquina = c.fkMaquina
-                LEFT JOIN aCaptura cap ON c.idComponente = cap.fkComponente
-                WHERE c.nome = "Processador"
+                JOIN CentralAtendimento c ON u.fkCentral = c.idCentral
+                JOIN Maquina m ON m.fkCentral = c.idCentral
+                JOIN Componente co ON m.idMaquina = co.fkMaquina
+                LEFT JOIN Captura cap ON co.idComponente = cap.fkComponente
+                WHERE co.nome = "Processador"
                 ORDER BY cap.dtCaptura DESC;
                 """
                 cursor.execute(query)
@@ -56,20 +55,19 @@ def selecionar_memoria():
                 query = """
                 SELECT 
                     u.nome AS Usuario,
-                    e.razaoSocial AS Empresa,
+                    c.nome AS Central,
                     m.marca AS Maquina,
                     m.sistemaOperacional AS SistemaOperacional,
-                    c.nome AS Componente,
+                    co.nome AS Componente,
                     CONCAT(cap.gbLivre, " GB") AS MemoriaLivre,
                     CONCAT(cap.gbEmUso, " GB") AS MemoriaEmUso,
                     cap.dtCaptura AS DataCaptura
                 FROM Usuario u
-                JOIN Empresa e ON u.fkEmpresa = e.idEmpresa
-                JOIN Lote l ON e.idEmpresa = l.fkEmpresa
-                JOIN Maquina m ON l.idLote = m.fkLote
-                JOIN Componente c ON m.idMaquina = c.fkMaquina
-                LEFT JOIN Captura cap ON c.idComponente = cap.fkComponente
-                WHERE c.nome = "Memória RAM"
+                JOIN CentralAtendimento c ON u.fkCentral = c.idCentral
+                JOIN Maquina m ON m.fkCentral = c.idCentral
+                JOIN Componente co ON m.idMaquina = co.fkMaquina
+                LEFT JOIN Captura cap ON co.idComponente = cap.fkComponente
+                WHERE co.nome = "Memória RAM"
                 ORDER BY cap.dtCaptura DESC;
                 """
                 cursor.execute(query)
@@ -90,7 +88,7 @@ def selecionar_disco():
                 query = """
                 SELECT 
                     u.nome AS Usuario,
-                    e.razaoSocial AS Empresa,
+                    c.nome AS Central,
                     m.marca AS Maquina,
                     m.sistemaOperacional AS SistemaOperacional,
                     c.nome AS Componente,
@@ -99,12 +97,11 @@ def selecionar_disco():
                     CONCAT(cap.porcentagemDeUso, "%") AS Percentual,
                     cap.dtCaptura AS DataCaptura
                 FROM Usuario u
-                JOIN Empresa e ON u.fkEmpresa = e.idEmpresa
-                JOIN Lote l ON e.idEmpresa = l.fkEmpresa
-                JOIN Maquina m ON l.idLote = m.fkLote
-                JOIN Componente c ON m.idMaquina = c.fkMaquina
-                LEFT JOIN Captura cap ON c.idComponente = cap.fkComponente
-                WHERE c.nome = "Disco Rígido"
+                JOIN CentralAtendimento c ON u.fkCentral = c.idCentral
+                JOIN Maquina m ON m.fkCentral = c.idCentral
+                JOIN Componente co ON m.idMaquina = co.fkMaquina
+                LEFT JOIN Captura cap ON co.idComponente = cap.fkComponente
+                WHERE co.nome = "Disco Rígido"
                 ORDER BY cap.dtCaptura DESC;
                 """
                 cursor.execute(query)
@@ -206,5 +203,4 @@ while loop:
 ║ Tenha um ótimo dia! 🌟                     ║
 ╚════════════════════════════════════════════╝
 """)
-    
 
