@@ -29,7 +29,7 @@ def selecionar_dados(tipo):
                     query = "SELECT * FROM vw_disco_rigido;"
                     headers = ["Usuário", "Empresa", "Máquina", "Sistema", "Componente", "GB Livre", "GB em Uso", "% Uso", "Data/Hora", "Hostname"]
                 else:
-                    return [], []  # se passar um tipo errado
+                    return [], []  
 
                 cursor.execute(query)
                 resultado = cursor.fetchall()

@@ -70,6 +70,8 @@ while True:
 
 # dados de cpu
     porcentagem = p.cpu_percent(interval=1, percpu=False)
+
+
     
 
     captura = [
@@ -82,7 +84,17 @@ while True:
         ["Disco em Uso (GB)", f"{disco_usado_formatado} GB"]
     ]
 
-    
+    print("""
+╔════════════════════════════════════════════╗
+║                                            ║
+║     ✅ DADOS INSERIDOS COM SUCESSO!        ║
+║                                            ║
+║   Os dados foram gravados no banco de      ║
+║  forma segura e o sistema foi atualizado.  ║
+╚════════════════════════════════════════════╝
+""")
+
+
     print(tabulate(captura, headers=["Componente", "Valor"], tablefmt="fancy_grid"))
     
     inserir_dados(porcentagem, dono_maquina, memoria_GB_free, memoria_usada_GB, disco_percent, disco_livre_gb, disco_usado_formatado,)
