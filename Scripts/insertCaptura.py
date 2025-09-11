@@ -17,18 +17,25 @@ config = {
       'database': os.getenv("DATABASE")
     }
 
-def inserir_porcentagem_cpu(porcentagem, dono_maquina):
+def inserir_dados(porcentagem, dono_maquina, memoria_GB_free, memoria_usada_GB, disco_percent, disco_livre_gb, disco_usado_formatado,):
+    index_cpu = 3
+    index_mem = 1
+    index_disco = 2
     try:
         db = connect(**config)
         if db.is_connected():
             db_info = db.server_info
 
             with db.cursor() as cursor:
-                
-                index_cpu = 3
-    
-                query = "INSERT INTO healthguard.captura (fkComponente, porcentagemDeUso, hostname, dtCaptura) VALUES (%s, %s, %s, %s)"
-                value = (index_cpu, porcentagem, dono_maquina, datetime.datetime.now())
+                if index_cpu == 3:
+                 query = "INSERT INTO healthguard.captura (fkComponente, porcentagemDeUso, hostname, dtCaptura) VALUES (%s, %s, %s, %s)"
+                 value = (index_cpu, porcentagem, dono_maquina, datetime.datetime.now())
+                elif index_mem == 1:
+                 query = "INSERT INTO healthguard.captura (fkComponente, gbLivre, gbEmUso, hostname, dtCaptura) VALUES (%s, %s, %s, %s, %s)"
+                 value = (index_mem, memoria_GB_free, memoria_usada_GB, dono_maquina, datetime.datetime.now())
+                elif index_disco == 2:
+                 query = "INSERT INTO healthguard.captura (fkComponente, gbLivre, gbEmUso, porcentagemDeUso, hostname,dtCaptura) VALUES (%s, %s, %s, %s, %s, %s)"
+                 value = (index_disco,  disco_livre_gb, disco_usado_formatado, disco_percent, dono_maquina, datetime.datetime.now())
                 cursor.execute(query, value)
                    
                 db.commit()    
@@ -36,42 +43,6 @@ def inserir_porcentagem_cpu(porcentagem, dono_maquina):
    
     except Error as e:
         print('Error to connect with MySQL -', e)
-
-
-def inserir_dados_memoria(memoria_GB_free, memoria_usada_GB, dono_maquina):
-    try:
-        db = connect(**config)
-        if db.is_connected():
-            with db.cursor() as cursor:
-
-                id_memoria = 1
-
-                query = "INSERT INTO healthguard.captura (fkComponente, gbLivre, gbEmUso, hostname, dtCaptura) VALUES (%s, %s, %s, %s, %s)"
-                value = (id_memoria, memoria_GB_free, memoria_usada_GB, dono_maquina, datetime.datetime.now())
-
-                cursor.execute(query, value)
-                db.commit()
-                print("")
-            db.close()
-    except Error as e:
-        print('Erro ao conectar com MySQL -', e)
-
-def inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado, dono_maquina):
-    try:
-        db = connect(**config)
-        if db.is_connected():
-            with db.cursor() as cursor:
-                
-                id_disco = 2
-                query = "INSERT INTO healthguard.captura (fkComponente, gbLivre, gbEmUso, porcentagemDeUso, hostname,dtCaptura) VALUES (%s, %s, %s, %s, %s, %s)"
-                value = (id_disco,  disco_livre_gb, disco_usado_formatado, disco_percent, dono_maquina, datetime.datetime.now())
-                cursor.execute(query, value)
-                db.commit()
-                print("")
-            db.close()  
-    except Error as e:
-        print('Erro ao conectar com MySQL -', e)         
-
 
 while True:
  
@@ -114,9 +85,7 @@ while True:
     
     print(tabulate(captura, headers=["Componente", "Valor"], tablefmt="fancy_grid"))
     
+    inserir_dados(porcentagem, dono_maquina, memoria_GB_free, memoria_usada_GB, disco_percent, disco_livre_gb, disco_usado_formatado,)
 
-    inserir_porcentagem_cpu(porcentagem, dono_maquina)
-    inserir_dados_memoria(memoria_GB_free, memoria_usada_GB, dono_maquina)
-    inserir_dados_disco(disco_percent, disco_livre_gb, disco_usado_formatado, dono_maquina)
 
     time.sleep(4)

@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 import os
 from tabulate import tabulate
 
-
 load_dotenv()
 
 config = {
@@ -14,96 +13,63 @@ config = {
     'database': os.getenv("DATABASE")
 }
 
-# Função para selecionar porcentagem de CPU
-def selecionar_porcentagem_cpu():
-    try:
-        db = connect(**config)
-        if db.is_connected():
-            print('Connected to MySQL server version -', db.server_info)
-            with db.cursor() as cursor:
-                query = """ 
-               select * from vw_cpu; """
-                cursor.execute(query)
-                resultado = cursor.fetchall()
-            cursor.close()
-            db.close()
-            return resultado
-    except Error as e:
-        print('Error to connect with MySQL -', e)
-        return []
 
-# Função para selecionar memória
-def selecionar_memoria():
+def selecionar_dados(tipo):
     try:
         db = connect(**config)
         if db.is_connected():
             with db.cursor() as cursor:
-                query = """
-                	select * from vw_memoria_ram;"""
+                if tipo == "cpu":
+                    query = "SELECT * FROM vw_cpu;"
+                    headers = ["Usuário", "Empresa", "Máquina", "Sistema", "Componente", "CPU %", "Data/Hora", "Hostname"]
+                elif tipo == "memoria":
+                    query = "SELECT * FROM vw_memoria_ram;"
+                    headers = ["Usuário", "Empresa", "Máquina", "Sistema", "Componente", "Memória Livre", "Memória em Uso", "Data/Hora", "Hostname"]
+                elif tipo == "disco":
+                    query = "SELECT * FROM vw_disco_rigido;"
+                    headers = ["Usuário", "Empresa", "Máquina", "Sistema", "Componente", "GB Livre", "GB em Uso", "% Uso", "Data/Hora", "Hostname"]
+                else:
+                    return [], []  # se passar um tipo errado
+
                 cursor.execute(query)
                 resultado = cursor.fetchall()
-            cursor.close()
             db.close()
-            return resultado
+            return resultado, headers
     except Error as e:
-        print('Error to connect with MySQL -', e)
-        return []
-
-# Função para selecionar disco
-def selecionar_disco():
-    try:
-        db = connect(**config)
-        if db.is_connected():
-            with db.cursor() as cursor:
-                query = """select * from vw_disco_rigido;"""
-                cursor.execute(query)
-                resultado = cursor.fetchall()
-            cursor.close()
-            db.close()
-            return resultado
-    except Error as e:
-        print('Error to connect with MySQL -', e)
-        return []
-
-
-resultadocpu = selecionar_porcentagem_cpu()
-resultadomemoria = selecionar_memoria()
-resultadodisco = selecionar_disco()
-
-
-
+        print("Erro ao conectar no MySQL:", e)
+        return [], []
 
 loop = True
 while loop:
     decisao = int(input("""
  ╔════════════════════════════════════════════╗
-║              🖥  MENU DO CLIENTE            ║
-╠════════════════════════════════════════════╣
-║ 1  Visualizar Porcentagem do uso da CPU    ║
-║ 2  Visualizar Dados de Memória             ║
-║ 3  Visualizar Dados do Disco               ║
-║ 4  Sair                                    ║
-╚════════════════════════════════════════════╝
+ ║              🖥  MENU DO CLIENTE            ║
+ ╠════════════════════════════════════════════╣
+ ║ 1  Visualizar Porcentagem do uso da CPU    ║
+ ║ 2  Visualizar Dados de Memória             ║
+ ║ 3  Visualizar Dados do Disco               ║
+ ║ 4  Sair                                    ║
+ ╚════════════════════════════════════════════╝
       """))
-   
+
     if decisao == 1:
-        if resultadocpu:
-            headers = ["Usuário", "Empresa", "Máquina", "Sistema", "Componente", "CPU %", "Data/Hora", "Hostname"]
-            print(tabulate(resultadocpu, headers=headers, tablefmt="fancy_grid"))
+        resultado, headers = selecionar_dados("cpu")
+        if resultado:
+            print(tabulate(resultado, headers=headers, tablefmt="fancy_grid"))
         else:
             print("Nenhum dado encontrado.")
 
     elif decisao == 2:
-        if resultadomemoria:
-            headers = ["Usuário", "Empresa", "Máquina", "Sistema", "Componente", "Memória Livre", "Memória em Uso", "Data/Hora", "Hostname"]
-            print(tabulate(resultadomemoria, headers=headers, tablefmt="fancy_grid"))
+        resultado, headers = selecionar_dados("memoria")
+        if resultado:
+            print(tabulate(resultado, headers=headers, tablefmt="fancy_grid"))
         else:
             print("Nenhum dado encontrado.")
 
     elif decisao == 3:
-        if resultadodisco:
-            headers = ["Usuário", "Empresa", "Máquina", "Sistema", "Componente", "GB Livre", "GB em Uso", "% Uso", "Data/Hora", "Hostname"]
-            print(tabulate(resultadodisco, headers=headers, tablefmt="fancy_grid"))
+        resultado, headers = selecionar_dados("disco")
+        if resultado:
+            print(tabulate(resultado, headers=headers, tablefmt="fancy_grid"))
         else:
             print("Nenhum dado encontrado.")
 
@@ -119,4 +85,3 @@ while loop:
 """)
     else:
         print("Opção inválida, tente novamente.")
-
