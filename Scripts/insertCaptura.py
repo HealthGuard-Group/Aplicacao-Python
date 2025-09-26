@@ -11,10 +11,10 @@ from tabulate import tabulate
 load_dotenv()
 
 config = {
-      'user': os.getenv("USER"),
-      'password': os.getenv("PASSWORD"),
-      'host': os.getenv("HOST"),
-      'database': os.getenv("DATABASE")
+      'user': os.getenv("USER_DB"),
+      'password': os.getenv("PASSWORD_DB"),
+      'host': os.getenv("HOST_DB"),
+      'database': os.getenv("DATABASE_DB")
     }
 
 def inserir_dados(porcentagem, dono_maquina, memoria_GB_free, memoria_usada_GB, disco_percent, disco_livre_gb, disco_usado_formatado,):
