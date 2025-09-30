@@ -3,6 +3,7 @@ from mysql.connector import connect, Error
 from dotenv import load_dotenv
 import os
 import time as t
+import random
 
 load_dotenv()
 
@@ -75,7 +76,6 @@ Para configurar sua maquína insira o código de configuração do DAC:""")
         t.sleep(2)
         configurarDac()
     else:
-        print("Comecei o select")
         validacao_cofiguracao = acaoComumBanco(f"SELECT idCodigoConfiguracao,fkUnidadeDeAtendimento,codigo FROM healthguard.CodigoConfiguracao WHERE codigo = '{codigoconfiguracao}' AND statusCodigo = 'Pedente'")
         if validacao_cofiguracao == []:
             print("Código Invalído")
@@ -89,10 +89,23 @@ Para configurar sua maquína insira o código de configuração do DAC:""")
                 mensagem += "."
                 t.sleep(1)
             id_codigo_configuracao = validacao_cofiguracao[0][0]
-            with open(nome_arquivo,'w', encoding='utf-8') as txt:
-                txt.write(codigoconfiguracao)
+            codigo_gerado = sorteadorTexto(20)
+            id_dac = acaoComumBanco(f"SELECT idDac FROM Dac WHERE codigoValidacao = '{codigoconfiguracao}'")
             acaoComumBanco(f"UPDATE healthguard.CodigoConfiguracao SET statusCodigo = 'Aceito' WHERE idCodigoConfiguracao = {id_codigo_configuracao}")
+            acaoComumBanco(f"UPDATE healthguard.Dac SET codigoValidacao = sha2('{codigo_gerado}',256) WHERE codigoValidacao = '{codigoconfiguracao}'")
+            codigo_configuracao_criptografado = acaoComumBanco(f"SELECT codigoValidacao FROM Dac WHERE idDac = {id_dac[0][0]}")
+            with open(nome_arquivo,'w', encoding='utf-8') as txt:
+                txt.write(codigo_configuracao_criptografado[0][0])
             return validacao_cofiguracao
     
+def sorteadorTexto(num_caracteres):
+    texto_gerado = ""
+    vetor_caracteres = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1', '2', '3', '4', '5', '6', '7', '8', '9','0']
+    for a in range(num_caracteres):
+        pos_aleatoria = random.randint(0,len(vetor_caracteres) - 1)
+        texto_gerado += vetor_caracteres[pos_aleatoria]
+    return texto_gerado
+
+
 limparTela()
 validarTxt()
