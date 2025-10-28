@@ -87,7 +87,7 @@ Para configurar sua maquína insira o código de configuração do DAC:""")
         t.sleep(2)
         configurarDac()
     else:
-        validacao_cofiguracao = acaoComumBanco(f"SELECT idCodigoConfiguracao,fkUnidadeDeAtendimento,codigo FROM healthguard.CodigoConfiguracao WHERE codigo = '{codigo_configuracao}' AND statusCodigo = 'Pedente'")
+        validacao_cofiguracao = acaoComumBanco(f"SELECT idCodigoConfiguracao,fkUnidadeDeAtendimento,codigo FROM healthguard.CodigoConfiguracaoMaquina WHERE codigo = '{codigo_configuracao}' AND statusCodigoConfiguracaoMaquina = 'Pendente'")
         if validacao_cofiguracao == []:
             print("Código Invalído")
             t.sleep(2)
@@ -102,7 +102,7 @@ Para configurar sua maquína insira o código de configuração do DAC:""")
             id_codigo_configuracao = validacao_cofiguracao[0][0]
             codigo_gerado = sorteadorTexto(20)
             id_dac = acaoComumBanco(f"SELECT idDac FROM Dac WHERE codigoValidacao = '{codigo_configuracao}'")
-            acaoComumBanco(f"UPDATE healthguard.CodigoConfiguracao SET statusCodigo = 'Aceito' WHERE idCodigoConfiguracao = {id_codigo_configuracao}")
+            acaoComumBanco(f"UPDATE healthguard.CodigoConfiguracao SET statusCodigoConfiguracaoMaquina = 'Aceito' WHERE idCodigoConfiguracao = {id_codigo_configuracao}")
             acaoComumBanco(f"UPDATE healthguard.Dac SET codigoValidacao = sha2('{codigo_gerado}',256) WHERE codigoValidacao = '{codigo_configuracao}'")
             codigo_configuracao_criptografado = acaoComumBanco(f"SELECT codigoValidacao FROM Dac WHERE idDac = {id_dac[0][0]}")
             validacao_cofiguracao.append(id_dac[0][0])
