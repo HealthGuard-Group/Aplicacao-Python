@@ -44,20 +44,20 @@ def validarTxt():
     if arquivo_existe:
         with open(nome_arquivo,'r', encoding='utf-8') as txt:
             codigo_cofiguracao = txt.read()
-        validacao_dac = acaoComumBanco(f"SELECT idDac,fkUnidadeDeAtendimento FROM healthguard.Dac WHERE statusDac != 'Excluido' AND codigoValidacao = '{codigo_cofiguracao}' ")
+        validacao_dac = acaoComumBanco(f"SELECT idDac,fkUnidadeDeAtendimento FROM Dac WHERE statusDac != 'Excluido' AND codigoValidacao = '{codigo_cofiguracao}' ")
         if validacao_dac == []:
             os.remove(nome_arquivo)
             verificao_dac = configurarDac()
             id_unidade_de_atendimento = verificao_dac[0][1]
             id_dac = verificao_dac[1]
-            id_monitoramentos_selecionados = acaoComumBanco(f"SELECT fkMedicoesDisponiveis FROM healthguard.MedicoesSelecionadas WHERE fkDac = {id_dac}")
+            id_monitoramentos_selecionados = acaoComumBanco(f"SELECT fkMedicoesDisponiveis FROM MedicoesSelecionadas WHERE fkDac = {id_dac}")
             lista_fks = [id_unidade_de_atendimento,id_dac,id_monitoramentos_selecionados]
             return lista_fks
         else:
             id_unidade_de_atendimento = validacao_dac[0][1]
             id_dac = acaoComumBanco(f"SELECT idDac FROM Dac WHERE codigoValidacao = '{codigo_cofiguracao}'")
             id_dac = id_dac[0][0]
-            id_monitoramentos_selecionados = acaoComumBanco(f"SELECT fkMedicoesDisponiveis FROM healthguard.MedicoesSelecionadas WHERE fkDac = {id_dac}")
+            id_monitoramentos_selecionados = acaoComumBanco(f"SELECT fkMedicoesDisponiveis FROM MedicoesSelecionadas WHERE fkDac = {id_dac}")
             lista_fks = [id_unidade_de_atendimento,id_dac,id_monitoramentos_selecionados]
             return lista_fks
             
@@ -65,7 +65,7 @@ def validarTxt():
         verificao_dac = configurarDac()
         id_unidade_de_atendimento = verificao_dac[0][1]
         id_dac = verificao_dac[1]
-        id_monitoramentos_selecionados = acaoComumBanco(f"SELECT fkMedicoesDisponiveis FROM healthguard.MedicoesSelecionadas WHERE fkDac = {id_dac}")
+        id_monitoramentos_selecionados = acaoComumBanco(f"SELECT fkMedicoesDisponiveis FROM MedicoesSelecionadas WHERE fkDac = {id_dac}")
         lista_fks = [id_unidade_de_atendimento,id_dac,id_monitoramentos_selecionados]
         return lista_fks
 
@@ -87,7 +87,8 @@ Para configurar sua maquína insira o código de configuração do DAC:""")
         t.sleep(2)
         configurarDac()
     else:
-        validacao_cofiguracao = acaoComumBanco(f"SELECT idCodigoConfiguracao,fkUnidadeDeAtendimento,codigo FROM healthguard.CodigoConfiguracaoMaquina WHERE codigo = '{codigo_configuracao}' AND statusCodigoConfiguracaoMaquina = 'Pendente'")
+        validacao_cofiguracao = acaoComumBanco(f"SELECT idCodigoConfiguracao,fkUnidadeDeAtendimento,codigo FROM CodigoConfiguracaoMaquina WHERE codigo = '{codigo_configuracao}' AND statusCodigoConfiguracaoMaquina = 'Pendente'")
+        print("Fiz o select recebi ", validacao_cofiguracao)
         if validacao_cofiguracao == []:
             print("Código Invalído")
             t.sleep(2)
@@ -99,11 +100,12 @@ Para configurar sua maquína insira o código de configuração do DAC:""")
                 print(mensagem)
                 mensagem += "."
                 t.sleep(1)
+            print("Inicei o processo de configuração")
             id_codigo_configuracao = validacao_cofiguracao[0][0]
             codigo_gerado = sorteadorTexto(20)
             id_dac = acaoComumBanco(f"SELECT idDac FROM Dac WHERE codigoValidacao = '{codigo_configuracao}'")
-            acaoComumBanco(f"UPDATE healthguard.CodigoConfiguracao SET statusCodigoConfiguracaoMaquina = 'Aceito' WHERE idCodigoConfiguracao = {id_codigo_configuracao}")
-            acaoComumBanco(f"UPDATE healthguard.Dac SET codigoValidacao = sha2('{codigo_gerado}',256) WHERE codigoValidacao = '{codigo_configuracao}'")
+            acaoComumBanco(f"UPDATE CodigoConfiguracaoMaquina SET statusCodigoConfiguracaoMaquina = 'Aceito' WHERE idCodigoConfiguracao = {id_codigo_configuracao}")
+            acaoComumBanco(f"UPDATE Dac SET codigoValidacao = sha2('{codigo_gerado}',256) WHERE codigoValidacao = '{codigo_configuracao}'")
             codigo_configuracao_criptografado = acaoComumBanco(f"SELECT codigoValidacao FROM Dac WHERE idDac = {id_dac[0][0]}")
             validacao_cofiguracao.append(id_dac[0][0])
             with open(nome_arquivo,'w', encoding='utf-8') as txt:
@@ -121,7 +123,7 @@ def sorteadorTexto(num_caracteres):
 def monitoramentosParaBinario(id_monitoramento_selecionados):
     global id_dac
     # Transoformando monitoramento_selecionados em binário
-    numero_monitoramento_disponiveis = acaoComumBanco("SELECT COUNT(nomeDaMedicao) FROM healthguard.MedicoesDisponiveis")
+    numero_monitoramento_disponiveis = acaoComumBanco("SELECT COUNT(nomeDaMedicao) FROM MedicoesDisponiveis")
     numero_monitoramento_disponiveis = numero_monitoramento_disponiveis[0][0]
     componentes = [item[0] for item in id_monitoramento_selecionados]
     binario_idMedicoesSelecionadas = []
@@ -160,7 +162,7 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
     return binario_idMedicoesSelecionadas
 
 def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_selecionados):
-    query = "INSERT INTO healthguard.leitura (fkUnidadeDeAtendimento,fkDac,fkMedicoesDisponiveis,fkMedicoesSelecionadas,medidaCapturada) VALUES"
+    query = "INSERT INTO Leitura (fkUnidadeDeAtendimento,fkDac,fkMedicoesDisponiveis,fkMedicoesSelecionadas,medidaCapturada) VALUES"
     if habilita_usoCPU == True:
         usoCPU = p.cpu_percent(interval=1, percpu=False)
         query += f"({id_unidade_atendimento},{id_dac},1,{id_monitoramentos_selecionados[0]},'{usoCPU}'),"
@@ -212,7 +214,7 @@ while True:
         print("Id Unidade Atendimento", id_unidade_atendimento)
         print("Id Dac:", id_dac)
         print("Id Monitoramento selecionados:", id_monitoramentos_selecionados)
-        acaoComumBanco(f"UPDATE healthguard.Dac SET statusDac = 'Ativo' WHERE idDac = {id_dac}")
+        acaoComumBanco(f"UPDATE Dac SET statusDac = 'Ativo' WHERE idDac = {id_dac}")
         id_monitoramentos_selecionados = monitoramentosParaBinario(id_monitoramentos_selecionados)
         contador = 0
         limparTela()
