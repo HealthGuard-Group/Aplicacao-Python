@@ -142,49 +142,17 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
     if binario[1] == 1:
-        global habilita_freqCPU
-        habilita_freqCPU = True
+        global habilita_Mem_used
+        habilita_Mem_used = True
         id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 2 AND fkDac = {id_dac}")
         if id_monitoramento_selecionados == []:
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
     if binario[2] == 1:
-        global habilita_Mem_used
-        habilita_Mem_used = True
+        global habilita_usoDisco
+        habilita_usoDisco = True
         id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 3 AND fkDac = {id_dac}")
-        if id_monitoramento_selecionados == []:
-            binario_idMedicoesSelecionadas.append(0)
-        else:
-            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
-    if binario[3] == 1:
-        global habilita_Mem_total
-        habilita_Mem_total = True
-        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 4 AND fkDac = {id_dac}")
-        if id_monitoramento_selecionados == []:
-            binario_idMedicoesSelecionadas.append(0)
-        else:
-            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
-    if binario[4] == 1:
-        global habilita_usoDisk
-        habilita_usoDisk = True
-        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 5 AND fkDac = {id_dac}")
-        if id_monitoramento_selecionados == []:
-            binario_idMedicoesSelecionadas.append(0)
-        else:
-            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
-    if binario[5] == 1:
-        global habilita_LivreDisk
-        habilita_LivreDisk = True
-        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 6 AND fkDac = {id_dac}")
-        if id_monitoramento_selecionados == []:
-            binario_idMedicoesSelecionadas.append(0)
-        else:
-            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
-    if binario[6] == 1:
-        global habilita_Disco_total
-        habilita_Disco_total = True
-        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 7 AND fkDac = {id_dac}")
         if id_monitoramento_selecionados == []:
             binario_idMedicoesSelecionadas.append(0)
         else:
@@ -196,26 +164,15 @@ def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_seleci
     if habilita_usoCPU == True:
         usoCPU = p.cpu_percent(interval=1, percpu=False)
         query += f"({id_unidade_atendimento},{id_dac},1,{id_monitoramentos_selecionados[0]},'{usoCPU}'),"
-    if habilita_freqCPU == True:
-        freqCPU = round((p.cpu_freq(percpu=False).current)/1000,2)
-        query += f"({id_unidade_atendimento},{id_dac},2,{id_monitoramentos_selecionados[1]},'{freqCPU}'),"
     if habilita_Mem_used == True:
         Mem_used = p.virtual_memory().percent
-        query += f"({id_unidade_atendimento},{id_dac},3,{id_monitoramentos_selecionados[2]},'{Mem_used}'),"
-    if habilita_Mem_total == True:
-        Mem_total = round(p.virtual_memory().total / (1024 ** 3),2)
-        query += f"({id_unidade_atendimento},{id_dac},4,{id_monitoramentos_selecionados[3]},'{Mem_total}'),"
-    if habilita_usoDisk == True:
-        usoDisk = round(p.disk_usage("C:/").used/ (1024**3),2)
-        query += f"({id_unidade_atendimento},{id_dac},5,{id_monitoramentos_selecionados[4]},'{usoDisk}'),"
-    if habilita_LivreDisk == True:
-        LivreDisk = round(p.disk_usage("C:/").free/ (1024**3),2)
-        query += f"({id_unidade_atendimento},{id_dac},6,{id_monitoramentos_selecionados[5]},'{LivreDisk}'),"
-    if habilita_Disco_total == True:
-        usoDisk = round(p.disk_usage("C:/").used/ (1024**3),2)
-        LivreDisk = round(p.disk_usage("C:/").free/ (1024**3),2)
-        Disco_total = usoDisk + LivreDisk
-        query += f"({id_unidade_atendimento},{id_dac},7,{id_monitoramentos_selecionados[6]},'{Disco_total}'),"
+        query += f"({id_unidade_atendimento},{id_dac},2,{id_monitoramentos_selecionados[1]},'{Mem_used}'),"
+    if habilita_usoDisco == True:
+        if os.name == 'nt':
+            memoria_used = p.disk_usage("C:\\").percent
+        else:
+            memoria_used = p.disk_usage("/").percent
+        query += f"({id_unidade_atendimento},{id_dac},3,{id_monitoramentos_selecionados[2]},'{memoria_used}'),"
     if query.endswith(","):
         query = query[:-1] + ";"
     else:
@@ -231,12 +188,9 @@ limparTela()
 
 #  Declaração dos Booleanos para captura
 habilita_usoCPU = False
-habilita_freqCPU = False
 habilita_Mem_used = False
-habilita_Mem_total = False
-habilita_usoDisk = False
-habilita_LivreDisk = False
-habilita_Disco_total = False
+habilita_usoDisco = False
+
 # 
 
 
