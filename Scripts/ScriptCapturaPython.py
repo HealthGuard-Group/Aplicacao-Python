@@ -12,8 +12,8 @@ config = {
       'password': os.getenv("PASSWORD_DB"),
       'host': os.getenv("HOST_DB"),
       'database': os.getenv("DATABASE_DB"),
-      'token': os.getenv("TOKEN_SLACK")
     }
+tokenSlack = os.getenv("TOKEN_SLACK")
 nome_arquivo = "configDAC.txt"
 
 def limparTela():
@@ -135,6 +135,7 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
     while contador < len(componentes):
         binario[componentes[contador]-1] = 1
         contador += 1
+    print(binario)
     if binario[0] == 1:
         global habilita_usoCPU
         habilita_usoCPU = True
@@ -145,22 +146,97 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
     if binario[1] == 1:
-        global habilita_Mem_used
-        habilita_Mem_used = True
+        global habilita_processosAtivos
+        habilita_processosAtivos = True
         id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 2 AND fkDac = {id_dac}")
         if id_monitoramento_selecionados == []:
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
     if binario[2] == 1:
-        global habilita_usoDisco
-        habilita_usoDisco = True
+        global habilita_quantidadeNucleos
+        habilita_quantidadeNucleos = True
         id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 3 AND fkDac = {id_dac}")
         if id_monitoramento_selecionados == []:
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    if binario[3] == 1:
+        global habilita_threads
+        habilita_threads = True
+        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 4 AND fkDac = {id_dac}")
+        if id_monitoramento_selecionados == []:
+            binario_idMedicoesSelecionadas.append(0)
+        else:
+            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    if binario[4] == 1:
+        global habilita_frequenciaAtual
+        habilita_frequenciaAtual = True
+        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 5 AND fkDac = {id_dac}")
+        if id_monitoramento_selecionados == []:
+            binario_idMedicoesSelecionadas.append(0)
+        else:
+            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    if binario[5] == 1:
+        global habilita_Mem_used
+        habilita_Mem_used = True
+        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 6 AND fkDac = {id_dac}")
+        if id_monitoramento_selecionados == []:
+            binario_idMedicoesSelecionadas.append(0)
+        else:
+            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    if binario[6] == 1:
+        global habilita_MemoriaTotal
+        habilita_MemoriaTotal = True
+        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 7 AND fkDac = {id_dac}")
+        if id_monitoramento_selecionados == []:
+            binario_idMedicoesSelecionadas.append(0)
+        else:
+            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    if binario[7] == 1:
+        global habilita_MemoriaSwap_used
+        habilita_MemoriaSwap_used = True
+        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 8 AND fkDac = {id_dac}")
+        if id_monitoramento_selecionados == []:
+            binario_idMedicoesSelecionadas.append(0)
+        else:
+            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    if binario[8] == 1:
+        global habilita_MemoriaSwap_Total
+        habilita_MemoriaSwap_Total = True
+        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 9 AND fkDac = {id_dac}")
+        if id_monitoramento_selecionados == []:
+            binario_idMedicoesSelecionadas.append(0)
+        else:
+            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    if binario[9] == 1:
+        global habilita_usoDisco
+        habilita_usoDisco = True
+        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 10 AND fkDac = {id_dac}")
+        if id_monitoramento_selecionados == []:
+            binario_idMedicoesSelecionadas.append(0)
+        else:
+            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    if binario[10] == 1:
+        global habilita_rede
+        habilita_rede = True
+        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 11 AND fkDac = {id_dac}")
+        if id_monitoramento_selecionados == []:
+            binario_idMedicoesSelecionadas.append(0)
+        else:
+            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    if binario[11] == 1:
+        global habilita_frequencia_maxima
+        habilita_frequencia_maxima = True
+        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 12 AND fkDac = {id_dac}")
+        if id_monitoramento_selecionados == []:
+            binario_idMedicoesSelecionadas.append(0)
+        else:
+            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
     return binario_idMedicoesSelecionadas
+
+def conversorByteParaGb(byte):
+    return round(byte / (1024**3),2)
 
 def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_selecionados):
     query = "INSERT INTO Leitura (fkUnidadeDeAtendimento,fkDac,fkMedicoesDisponiveis,fkMedicoesSelecionadas,medidaCapturada) VALUES"
@@ -169,13 +245,37 @@ def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_seleci
         query += f"({id_unidade_atendimento},{id_dac},1,{id_monitoramentos_selecionados[0]},'{usoCPU}'),"
     if habilita_Mem_used == True:
         Mem_used = p.virtual_memory().percent
-        query += f"({id_unidade_atendimento},{id_dac},2,{id_monitoramentos_selecionados[1]},'{Mem_used}'),"
+        query += f"({id_unidade_atendimento},{id_dac},6,{id_monitoramentos_selecionados[5]},'{Mem_used}'),"
     if habilita_usoDisco == True:
         if os.name == 'nt':
             memoria_used = p.disk_usage("C:\\").percent
         else:
             memoria_used = p.disk_usage("/").percent
-        query += f"({id_unidade_atendimento},{id_dac},3,{id_monitoramentos_selecionados[2]},'{memoria_used}'),"
+        query += f"({id_unidade_atendimento},{id_dac},10,{id_monitoramentos_selecionados[9]},'{memoria_used}'),"
+    if habilita_processosAtivos == True:
+        qtd_processo_ativos = len(p.pids())
+        query += f"({id_unidade_atendimento},{id_dac},2,{id_monitoramentos_selecionados[1]},'{qtd_processo_ativos}'),"
+    if habilita_quantidadeNucleos == True:
+        qtd_nucleos = p.cpu_count(logical=False)
+        query += f"({id_unidade_atendimento},{id_dac},3,{id_monitoramentos_selecionados[2]},'{qtd_nucleos}'),"
+    if habilita_threads == True:
+        qtd_threads = p.cpu_count(logical=True)
+        query += f"({id_unidade_atendimento},{id_dac},4,{id_monitoramentos_selecionados[3]},'{qtd_threads}'),"
+    if habilita_frequenciaAtual == True:
+        frequencia_atual = p.cpu_freq().current
+        query += f"({id_unidade_atendimento},{id_dac},5,{id_monitoramentos_selecionados[4]},'{frequencia_atual}'),"
+    if habilita_frequencia_maxima == True:
+        frequencia_maxima = p.cpu_freq().max
+        query += f"({id_unidade_atendimento},{id_dac},12,{id_monitoramentos_selecionados[11]},'{frequencia_atual}'),"
+    if habilita_MemoriaTotal == True:
+        memoria_total = round(conversorByteParaGb(p.virtual_memory().total),0)
+        query += f"({id_unidade_atendimento},{id_dac},7,{id_monitoramentos_selecionados[6]},'{memoria_total}'),"
+    if habilita_MemoriaSwap_used == True:
+        memoria_swap_uso = p.swap_memory().percent
+        query += f"({id_unidade_atendimento},{id_dac},8,{id_monitoramentos_selecionados[7]},'{memoria_swap_uso}'),"
+    if habilita_MemoriaSwap_Total == True:
+        memoria_swap_total = conversorByteParaGb(p.swap_memory().total)
+        query += f"({id_unidade_atendimento},{id_dac},9,{id_monitoramentos_selecionados[8]},'{memoria_swap_total}'),"
     if query.endswith(","):
         query = query[:-1] + ";"
     else:
@@ -191,8 +291,17 @@ limparTela()
 
 #  Declaração dos Booleanos para captura
 habilita_usoCPU = False
+habilita_processosAtivos = False
+habilita_quantidadeNucleos = False
+habilita_threads = False
+habilita_frequenciaAtual = False
 habilita_Mem_used = False
+habilita_MemoriaTotal = False
+habilita_MemoriaSwap_used = False
+habilita_MemoriaSwap_Total = False
 habilita_usoDisco = False
+habilita_rede = False
+habilita_frequencia_maxima = False
 
 # 
 
