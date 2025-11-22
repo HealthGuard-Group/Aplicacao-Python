@@ -168,11 +168,11 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
 def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_selecionados):
     query = "INSERT INTO Leitura (fkUnidadeDeAtendimento,fkDac,fkMedicoesDisponiveis,fkMedicoesSelecionadas,medidaCapturada) VALUES"
     alertas = []
-    # capture valores e persista (igual ao seu original)
+    
     if habilita_usoCPU == True:
         usoCPU = p.cpu_percent(interval=1, percpu=False)
         query += f"({id_unidade_atendimento},{id_dac},1,{id_monitoramentos_selecionados[0]},'{usoCPU}'),"
-        # checa threshold e agenda alerta
+        
         if float(usoCPU) > 90.0:
             alertas.append(("CPU", usoCPU))
     if habilita_Mem_used == True:
