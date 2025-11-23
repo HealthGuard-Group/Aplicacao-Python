@@ -2,8 +2,10 @@ import psutil as p
 from mysql.connector import connect, Error
 from dotenv import load_dotenv
 import os
+import datetime
 import time as t
 import random
+import json
 
 load_dotenv()
 
@@ -233,6 +235,38 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    if binario[12] == 1:
+        global habilita_tempo_atividade
+        habilita_tempo_atividade = True
+        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 13 AND fkDac = {id_dac}")
+        if id_monitoramento_selecionados == []:
+            binario_idMedicoesSelecionadas.append(0)
+        else:
+            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    if binario[13] == 1:
+        global habilita_espaco_livre_disco
+        habilita_espaco_livre_disco = True
+        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 14 AND fkDac = {id_dac}")
+        if id_monitoramento_selecionados == []:
+            binario_idMedicoesSelecionadas.append(0)
+        else:
+            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    if binario[14] == 1:
+        global habilita_iops
+        habilita_iops = True
+        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 15 AND fkDac = {id_dac}")
+        if id_monitoramento_selecionados == []:
+            binario_idMedicoesSelecionadas.append(0)
+        else:
+            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    if binario[15] == 1:
+        global habilita_particao_disco
+        habilita_particao_disco = True
+        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 16 AND fkDac = {id_dac}")
+        if id_monitoramento_selecionados == []:
+            binario_idMedicoesSelecionadas.append(0)
+        else:
+            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
     return binario_idMedicoesSelecionadas
 
 def conversorByteParaGb(byte):
@@ -266,7 +300,7 @@ def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_seleci
         query += f"({id_unidade_atendimento},{id_dac},5,{id_monitoramentos_selecionados[4]},'{frequencia_atual}'),"
     if habilita_frequencia_maxima == True:
         frequencia_maxima = p.cpu_freq().max
-        query += f"({id_unidade_atendimento},{id_dac},12,{id_monitoramentos_selecionados[11]},'{frequencia_atual}'),"
+        query += f"({id_unidade_atendimento},{id_dac},12,{id_monitoramentos_selecionados[11]},'{frequencia_maxima}'),"
     if habilita_MemoriaTotal == True:
         memoria_total = round(conversorByteParaGb(p.virtual_memory().total),0)
         query += f"({id_unidade_atendimento},{id_dac},7,{id_monitoramentos_selecionados[6]},'{memoria_total}'),"
@@ -276,13 +310,59 @@ def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_seleci
     if habilita_MemoriaSwap_Total == True:
         memoria_swap_total = conversorByteParaGb(p.swap_memory().total)
         query += f"({id_unidade_atendimento},{id_dac},9,{id_monitoramentos_selecionados[8]},'{memoria_swap_total}'),"
+    if habilita_tempo_atividade == True:
+        tempo_atividade = datetime.datetime.now() - datetime.datetime.fromtimestamp(p.boot_time())
+        total_segundos = int(tempo_atividade.total_seconds())
+        horas = total_segundos // 3600
+        minutos = (total_segundos % 3600) // 60
+        segundos = total_segundos % 60
+        tempo_atividade = f"{horas:02}:{minutos:02}:{segundos:02}"
+        query += f"({id_unidade_atendimento},{id_dac},13,{id_monitoramentos_selecionados[12]},'{tempo_atividade}'),"
+    if habilita_espaco_livre_disco == True:
+        if os.name == 'nt':
+            memoria_free = conversorByteParaGb(p.disk_usage("C:\\").free)
+        else:
+            memoria_free = conversorByteParaGb(p.disk_usage("/").free)
+        query += f"({id_unidade_atendimento},{id_dac},14,{id_monitoramentos_selecionados[13]},'{memoria_free}'),"
+    if habilita_iops == True:
+        inicio_ciclo = t.time()
+        io_inicial = p.disk_io_counters()
+        t.sleep(1)
+        io_final = p.disk_io_counters()
+        tempo_real = t.time() - inicio_ciclo  
+        iops = ((io_final.read_count - io_inicial.read_count) + (io_final.write_count - io_inicial.write_count)) / tempo_real
+        query += f"({id_unidade_atendimento},{id_dac},15,{id_monitoramentos_selecionados[14]},'{iops}'),"
+    if habilita_particao_disco == True:
+        partitions = p.disk_partitions(all=False)
+        particoes_json = {}
+        for partition in partitions:
+            try:
+                part_usage = p.disk_usage(partition.mountpoint)
+                if ':\\' in partition.mountpoint:
+                    nome_particao = partition.mountpoint.split(':\\')[0]
+                else:
+                    nome_particao = partition.mountpoint.replace('/', '')
+                    if nome_particao == '':
+                        nome_particao = 'root'
+                particoes_json[nome_particao] = {
+                    'percentual': part_usage.percent,
+                    'livre_gb': round(part_usage.free / (1024**3), 1),
+                    'total_gb': round(part_usage.total / (1024**3), 1),
+                    'montagem': partition.mountpoint
+                }   
+            except PermissionError:
+                continue
+        particoes_json_str = json.dumps(particoes_json, ensure_ascii=False)
+        query += f"({id_unidade_atendimento},{id_dac},16,{id_monitoramentos_selecionados[15]},'{particoes_json_str}'),"
     if query.endswith(","):
         query = query[:-1] + ";"
     else:
         query = ""
     if query != "":
         acaoComumBanco(query)
-    if habilita_usoCPU == True:
+    if habilita_usoCPU == True and habilita_iops == True:
+        t.sleep(8)
+    elif habilita_iops == True or habilita_usoCPU == True:
         t.sleep(9)
     else:
         t.sleep(10)
@@ -302,6 +382,10 @@ habilita_MemoriaSwap_Total = False
 habilita_usoDisco = False
 habilita_rede = False
 habilita_frequencia_maxima = False
+habilita_tempo_atividade = False
+habilita_espaco_livre_disco = False
+habilita_iops = False
+habilita_particao_disco = False
 
 # 
 
