@@ -147,6 +147,8 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     if binario[1] == 1:
         global habilita_processosAtivos
         habilita_processosAtivos = True
@@ -155,6 +157,8 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     if binario[2] == 1:
         global habilita_quantidadeNucleos
         habilita_quantidadeNucleos = True
@@ -163,6 +167,8 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     if binario[3] == 1:
         global habilita_threads
         habilita_threads = True
@@ -171,6 +177,8 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     if binario[4] == 1:
         global habilita_frequenciaAtual
         habilita_frequenciaAtual = True
@@ -179,6 +187,8 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     if binario[5] == 1:
         global habilita_Mem_used
         habilita_Mem_used = True
@@ -187,6 +197,8 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     if binario[6] == 1:
         global habilita_MemoriaTotal
         habilita_MemoriaTotal = True
@@ -195,6 +207,8 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     if binario[7] == 1:
         global habilita_MemoriaSwap_used
         habilita_MemoriaSwap_used = True
@@ -203,6 +217,8 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     if binario[8] == 1:
         global habilita_MemoriaSwap_Total
         habilita_MemoriaSwap_Total = True
@@ -211,6 +227,8 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     if binario[9] == 1:
         global habilita_usoDisco
         habilita_usoDisco = True
@@ -219,6 +237,8 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     if binario[10] == 1:
         global habilita_rede
         habilita_rede = True
@@ -227,6 +247,8 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     if binario[11] == 1:
         global habilita_frequencia_maxima
         habilita_frequencia_maxima = True
@@ -235,6 +257,8 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     if binario[12] == 1:
         global habilita_tempo_atividade
         habilita_tempo_atividade = True
@@ -243,6 +267,8 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     if binario[13] == 1:
         global habilita_espaco_livre_disco
         habilita_espaco_livre_disco = True
@@ -251,6 +277,8 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     if binario[14] == 1:
         global habilita_iops
         habilita_iops = True
@@ -259,6 +287,8 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     if binario[15] == 1:
         global habilita_particao_disco
         habilita_particao_disco = True
@@ -267,12 +297,16 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(0)
         else:
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
+    print(binario_idMedicoesSelecionadas)
     return binario_idMedicoesSelecionadas
 
 def conversorByteParaGb(byte):
     return round(byte / (1024**3),2)
 
 def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_selecionados):
+    print(id_monitoramentos_selecionados)
     query = "INSERT INTO Leitura (fkUnidadeDeAtendimento,fkDac,fkMedicoesDisponiveis,fkMedicoesSelecionadas,medidaCapturada) VALUES"
     if habilita_usoCPU == True:
         usoCPU = p.cpu_percent(interval=1, percpu=False)
