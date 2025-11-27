@@ -125,20 +125,30 @@ def sorteadorTexto(num_caracteres):
 
 def gerarAlerta(idDac,idMonitoramentoD,idMonitoramentoS,idUnidade,valorCaptura):
     metricaAlerta = acaoComumBanco(f"SELECT min(valorMinimo),max(valorMaximo) FROM MetricaAlerta WHERE fkDac = {idDac} AND fkMedicoesDisponiveis = {idMonitoramentoD}")
-    print(metricaAlerta)
-    if metricaAlerta[0][0] == None:
-        metricaAlerta = acaoComumBanco(f"SELECT min(valorMinimo),max(valorMaximo) FROM MetricaAlerta WHERE fkUnidadeDeAtendimento = {idUnidade} AND fkMedicoesDisponiveis = {idMonitoramentoD}")
-    existeAlerta = acaoComumBanco(f"SELECT idAlerta,pico FROM Alerta WHERE dataTermino IS NULL AND fkMedicoesSelecionadas = {idMonitoramentoS}")
-    print(existeAlerta)
-    if len(existeAlerta) == 0:
-        if valorCaptura >= metricaAlerta[0][0]:
-            acaoComumBanco(f"INSERT INTO Alerta(fkUnidadeDeAtendimento,fkMedicoesDisponiveis,fkDac,fkMedicoesSelecionadas,pico) VALUES ({idUnidade},{idMonitoramentoD},{idDac},{idMonitoramentoS},'{valorCaptura}')")
-    else:
-        if valorCaptura < metricaAlerta[0][0]:
-            acaoComumBanco(f"UPDATE Alerta SET dataTermino = NOW() WHERE idAlerta = {existeAlerta[0][0]}")
+    if idMonitoramentoD == 8:
+        existeAlerta = acaoComumBanco(f"SELECT idAlerta,pico FROM Alerta WHERE dataTermino IS NULL AND fkMedicoesSelecionadas = {idMonitoramentoS}")
+        if len(existeAlerta) == 0:
+            if valorCaptura >= 10:
+                acaoComumBanco(f"INSERT INTO Alerta(fkUnidadeDeAtendimento,fkMedicoesDisponiveis,fkDac,fkMedicoesSelecionadas,pico) VALUES ({idUnidade},{idMonitoramentoD},{idDac},{idMonitoramentoS},'{valorCaptura}')")
         else:
-            if valorCaptura > float(existeAlerta[0][1]):
-                acaoComumBanco(f"UPDATE Alerta SET pico = '{valorCaptura}' WHERE idAlerta = {existeAlerta[0][0]}")
+            if valorCaptura < 10:
+                acaoComumBanco(f"UPDATE Alerta SET dataTermino = NOW() WHERE idAlerta = {existeAlerta[0][0]}")
+            else:
+                if valorCaptura > float(existeAlerta[0][1]):
+                    acaoComumBanco(f"UPDATE Alerta SET pico = '{valorCaptura}' WHERE idAlerta = {existeAlerta[0][0]}")
+    else:
+        if metricaAlerta[0][0] == None:
+            metricaAlerta = acaoComumBanco(f"SELECT min(valorMinimo),max(valorMaximo) FROM MetricaAlerta WHERE fkUnidadeDeAtendimento = {idUnidade} AND fkMedicoesDisponiveis = {idMonitoramentoD}")
+        existeAlerta = acaoComumBanco(f"SELECT idAlerta,pico FROM Alerta WHERE dataTermino IS NULL AND fkMedicoesSelecionadas = {idMonitoramentoS}")
+        if len(existeAlerta) == 0:
+            if valorCaptura >= metricaAlerta[0][0]:
+                acaoComumBanco(f"INSERT INTO Alerta(fkUnidadeDeAtendimento,fkMedicoesDisponiveis,fkDac,fkMedicoesSelecionadas,pico) VALUES ({idUnidade},{idMonitoramentoD},{idDac},{idMonitoramentoS},'{valorCaptura}')")
+        else:
+            if valorCaptura < metricaAlerta[0][0]:
+                acaoComumBanco(f"UPDATE Alerta SET dataTermino = NOW() WHERE idAlerta = {existeAlerta[0][0]}")
+            else:
+                if valorCaptura > float(existeAlerta[0][1]):
+                    acaoComumBanco(f"UPDATE Alerta SET pico = '{valorCaptura}' WHERE idAlerta = {existeAlerta[0][0]}")
     limparTela()
 
 
@@ -371,6 +381,7 @@ def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_seleci
         query += f"({id_unidade_atendimento},{id_dac},7,{id_monitoramentos_selecionados[6]},'{memoria_total}'),"
     if habilita_MemoriaSwap_used == True:
         memoria_swap_uso = p.swap_memory().percent
+        gerarAlerta(id_dac,8,id_monitoramentos_selecionados[7],id_unidade_atendimento,memoria_swap_uso)
         query += f"({id_unidade_atendimento},{id_dac},8,{id_monitoramentos_selecionados[7]},'{memoria_swap_uso}'),"
     if habilita_MemoriaSwap_Total == True:
         memoria_swap_total = conversorByteParaGb(p.swap_memory().total)
