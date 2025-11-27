@@ -318,7 +318,16 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
     else:
         binario_idMedicoesSelecionadas.append(0)
-    print(binario_idMedicoesSelecionadas)
+    if binario[16] == 1:
+        global habilita_ranking
+        habilita_ranking = True
+        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 17 AND fkDac = {id_dac}")
+        if id_monitoramento_selecionados == []:
+            binario_idMedicoesSelecionadas.append(0)
+        else:
+            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     return binario_idMedicoesSelecionadas
 
 def conversorByteParaGb(byte):
@@ -410,6 +419,22 @@ def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_seleci
                 continue
         particoes_json_str = json.dumps(particoes_json, ensure_ascii=False)
         query += f"({id_unidade_atendimento},{id_dac},16,{id_monitoramentos_selecionados[15]},'{particoes_json_str}'),"
+    if habilita_ranking == True:
+        processos = []
+        for proc in p.process_iter(['name', 'memory_info']):
+            try:
+                info = proc.info
+                memoria_mb = info['memory_info'].rss / (1024 * 1024) # Converte Bytes para MB
+                processos.append({
+                    'nome': info['name'],
+                    'memoria_mb': round(memoria_mb, 2)
+                })
+            except (p.NoSuchProcess, p.AccessDenied, p.ZombieProcess):
+                pass
+        processos_ordenados = sorted(processos, key=lambda processo: processo['memoria_mb'], reverse=True)
+        processos_ordenados = processos_ordenados[:5]
+        processos_formatado = json.dumps(processos_ordenados)
+        query += f"({id_unidade_atendimento},{id_dac},17,{id_monitoramentos_selecionados[16]},'{processos_formatado}'),"
     if query.endswith(","):
         query = query[:-1] + ";"
     else:
@@ -442,7 +467,7 @@ habilita_tempo_atividade = False
 habilita_espaco_livre_disco = False
 habilita_iops = False
 habilita_particao_disco = False
-
+habilita_ranking = False
 # 
 
 
