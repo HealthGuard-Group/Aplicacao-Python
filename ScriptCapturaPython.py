@@ -123,9 +123,28 @@ def sorteadorTexto(num_caracteres):
         texto_gerado += vetor_caracteres[pos_aleatoria]
     return texto_gerado
 
+def gerarAlerta(idDac,idMonitoramentoD,idMonitoramentoS,idUnidade,valorCaptura):
+    metricaAlerta = acaoComumBanco(f"SELECT min(valorMinimo),max(valorMaximo) FROM MetricaAlerta WHERE fkDac = {idDac} AND fkMedicoesDisponiveis = {idMonitoramentoD}")
+    print(metricaAlerta)
+    if metricaAlerta[0][0] == None:
+        metricaAlerta = acaoComumBanco(f"SELECT min(valorMinimo),max(valorMaximo) FROM MetricaAlerta WHERE fkUnidadeDeAtendimento = {idUnidade} AND fkMedicoesDisponiveis = {idMonitoramentoD}")
+    existeAlerta = acaoComumBanco(f"SELECT idAlerta,pico FROM Alerta WHERE dataTermino IS NULL AND fkMedicoesSelecionadas = {idMonitoramentoS}")
+    print(existeAlerta)
+    if len(existeAlerta) == 0:
+        if valorCaptura >= metricaAlerta[0][0]:
+            acaoComumBanco(f"INSERT INTO Alerta(fkUnidadeDeAtendimento,fkMedicoesDisponiveis,fkDac,fkMedicoesSelecionadas,pico) VALUES ({idUnidade},{idMonitoramentoD},{idDac},{idMonitoramentoS},'{valorCaptura}')")
+    else:
+        if valorCaptura < metricaAlerta[0][0]:
+            acaoComumBanco(f"UPDATE Alerta SET dataTermino = NOW() WHERE idAlerta = {existeAlerta[0][0]}")
+        else:
+            if valorCaptura > float(existeAlerta[0][1]):
+                acaoComumBanco(f"UPDATE Alerta SET pico = '{valorCaptura}' WHERE idAlerta = {existeAlerta[0][0]}")
+    limparTela()
+
+
 def monitoramentosParaBinario(id_monitoramento_selecionados):
     global id_dac
-    # Transoformando monitoramento_selecionados em binário
+    # Transformando monitoramento_selecionados em binário
     numero_monitoramento_disponiveis = acaoComumBanco("SELECT COUNT(nomeDaMedicao) FROM MedicoesDisponiveis")
     numero_monitoramento_disponiveis = numero_monitoramento_disponiveis[0][0]
     componentes = [item[0] for item in id_monitoramento_selecionados]
@@ -310,15 +329,18 @@ def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_seleci
     query = "INSERT INTO Leitura (fkUnidadeDeAtendimento,fkDac,fkMedicoesDisponiveis,fkMedicoesSelecionadas,medidaCapturada) VALUES"
     if habilita_usoCPU == True:
         usoCPU = p.cpu_percent(interval=1, percpu=False)
+        gerarAlerta(id_dac,1,id_monitoramentos_selecionados[0],id_unidade_atendimento,usoCPU)
         query += f"({id_unidade_atendimento},{id_dac},1,{id_monitoramentos_selecionados[0]},'{usoCPU}'),"
     if habilita_Mem_used == True:
         Mem_used = p.virtual_memory().percent
+        gerarAlerta(id_dac,6,id_monitoramentos_selecionados[5],id_unidade_atendimento,Mem_used)
         query += f"({id_unidade_atendimento},{id_dac},6,{id_monitoramentos_selecionados[5]},'{Mem_used}'),"
     if habilita_usoDisco == True:
         if os.name == 'nt':
             memoria_used = p.disk_usage("C:\\").percent
         else:
             memoria_used = p.disk_usage("/").percent
+        gerarAlerta(id_dac,10,id_monitoramentos_selecionados[9],id_unidade_atendimento,memoria_used)
         query += f"({id_unidade_atendimento},{id_dac},10,{id_monitoramentos_selecionados[9]},'{memoria_used}'),"
     if habilita_processosAtivos == True:
         qtd_processo_ativos = len(p.pids())
