@@ -2,3 +2,4 @@
 venv
 venv-ambiente-Captura
 configDAC.txt
+__pycache__
