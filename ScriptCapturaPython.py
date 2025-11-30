@@ -381,7 +381,7 @@ def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_seleci
         qtd_nucleos = p.cpu_count(logical=False)
         query += f"({id_unidade_atendimento},{id_dac},3,{id_monitoramentos_selecionados[2]},'{qtd_nucleos}'),"
     if habilita_threads == True:
-        qtd_threads = p.cpu_count(logical=True)
+        qtd_threads = get_total_threads()
         query += f"({id_unidade_atendimento},{id_dac},4,{id_monitoramentos_selecionados[3]},'{qtd_threads}'),"
     if habilita_frequenciaAtual == True:
         frequencia_atual = p.cpu_freq().current
@@ -504,6 +504,19 @@ id_monitoramentos_selecionados = 0
 
 contador = (4 * 60 * 60) /10
 print(contador)
+
+def get_total_threads():
+        contagem_total = 0
+        
+        for proc in p.process_iter(['num_threads']):
+            try:
+                # Soma as threads de cada processo
+                contagem_total += proc.info['num_threads']
+            except (p.NoSuchProcess, p.AccessDenied):
+                pass # Ignora processos que fecharam ou que não temos permissão
+                
+        return contagem_total
+
 while True:
     if contador == (4 * 60 * 60) / 10:
         fks = validarTxt()
@@ -519,4 +532,6 @@ while True:
         limparTela()
     monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_selecionados)
     contador += 1
+
+
     
