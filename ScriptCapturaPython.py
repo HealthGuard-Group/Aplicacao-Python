@@ -127,7 +127,7 @@ def sorteadorTexto(num_caracteres):
 
 def gerarAlerta(idDac,idMonitoramentoD,idMonitoramentoS,idUnidade,valorCaptura):
     metricaAlerta = acaoComumBanco(f"SELECT valorMinimo,valorMaximo FROM MetricaAlerta WHERE fkDac = {idDac} AND fkMedicoesDisponiveis = {idMonitoramentoD} ORDER BY valorMinimo;")
-    print(metricaAlerta)
+    print('Metrica alerta DAC ', metricaAlerta)
     if idMonitoramentoD == 8:
         existeAlerta = acaoComumBanco(f"SELECT idAlerta,pico FROM Alerta WHERE dataTermino IS NULL AND fkMedicoesSelecionadas = {idMonitoramentoS}")
         if len(existeAlerta) == 0:
@@ -141,7 +141,8 @@ def gerarAlerta(idDac,idMonitoramentoD,idMonitoramentoS,idUnidade,valorCaptura):
                     acaoComumBanco(f"UPDATE Alerta SET pico = '{valorCaptura}' WHERE idAlerta = {existeAlerta[0][0]}")
     else:
         if len(metricaAlerta) == 0 or metricaAlerta[0][0] == None:
-            metricaAlerta = acaoComumBanco(f"SELECT valorMinimo,valorMaximo FROM MetricaAlerta WHERE fkUnidadeDeAtendimento = {idUnidade} AND fkMedicoesDisponiveis = {idMonitoramentoD} ORDER BY valorMinimo;")
+            metricaAlerta = acaoComumBanco(f"SELECT valorMinimo,valorMaximo FROM MetricaAlerta WHERE fkUnidadeDeAtendimento = {idUnidade} AND fkMedicoesDisponiveis = {idMonitoramentoD} AND fkDac IS NULL ORDER BY valorMinimo;")
+            print('Metrica alerta UNIDADE ', metricaAlerta)
         existeAlerta = acaoComumBanco(f"SELECT idAlerta,pico FROM Alerta WHERE dataTermino IS NULL AND fkMedicoesSelecionadas = {idMonitoramentoS}")
         if len(existeAlerta) == 0:
             if valorCaptura >= metricaAlerta[0][0]:
