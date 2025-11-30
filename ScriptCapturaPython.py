@@ -352,6 +352,16 @@ def monitoramentosParaBinario(id_monitoramento_selecionados):
             binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
     else:
         binario_idMedicoesSelecionadas.append(0)
+    if binario[17] == 1:
+        global habilita_usoCPU_nucleo
+        habilita_usoCPU_nucleo = True
+        id_medicoes_selecionadas = acaoComumBanco(f"SELECT idMedicoesSelecionadas FROM MedicoesSelecionadas WHERE fkMedicoesDisponiveis = 18 AND fkDac = {id_dac}")
+        if id_monitoramento_selecionados == []:
+            binario_idMedicoesSelecionadas.append(0)
+        else:
+            binario_idMedicoesSelecionadas.append(id_medicoes_selecionadas[0][0])
+    else:
+        binario_idMedicoesSelecionadas.append(0)
     return binario_idMedicoesSelecionadas
 
 def conversorByteParaGb(byte):
@@ -460,6 +470,9 @@ def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_seleci
         processos_ordenados = processos_ordenados[:5]
         processos_formatado = json.dumps(processos_ordenados)
         query += f"({id_unidade_atendimento},{id_dac},17,{id_monitoramentos_selecionados[16]},'{processos_formatado}'),"
+    if habilita_usoCPU_nucleo == True:
+        usoCPU_nucleo = p.cpu_percent(interval=1, percpu=True)  
+        query += f"({id_unidade_atendimento},{id_dac},18,{id_monitoramentos_selecionados[17]},'{usoCPU_nucleo}'),"
     if query.endswith(","):
         query = query[:-1] + ";"
     else:
@@ -467,7 +480,7 @@ def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_seleci
     if query != "":
         acaoComumBanco(query)
     if habilita_usoCPU == True and habilita_iops == True:
-        t.sleep(8)
+        t.sleep(7)
     elif habilita_iops == True or habilita_usoCPU == True:
         t.sleep(9)
     else:
@@ -493,6 +506,7 @@ habilita_espaco_livre_disco = False
 habilita_iops = False
 habilita_particao_disco = False
 habilita_ranking = False
+habilita_usoCPU_nucleo = False
 # 
 
 
