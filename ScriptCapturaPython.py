@@ -435,9 +435,40 @@ def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_seleci
     if habilita_particao_disco == True:
         partitions = p.disk_partitions(all=False)
         particoes_json = {}
+
+        # Vetor com tudo que deve ser ignorado no Linux
+        ignorar_no_linux = [
+            '/snap/',      # Todos os snaps
+            '/proc/',      # Sistema de processos
+            '/sys/',       # Sistema de arquivos do kernel
+            '/dev/',       # Dispositivos
+            '/run/',       # Arquivos de execução
+            '/tmp/',       # Temporários
+            '/var/snap/',  # Dados de snaps
+            '/home/snap/'  # Snaps no home
+        ]
+
         for partition in partitions:
             try:
+
+                # FILTRAR PARTIÇÕES INSIGNIFICANTES NO LINUX
+                if not ':\\' in partition.mountpoint:  # Se for Linux
+                    # Verificar se é uma partição a ignorar
+                    ignorar = False
+                    for item in ignorar_no_linux:
+                        if item in partition.mountpoint:
+                            ignorar = True
+                            break
+                    
+                    if ignorar:
+                        continue  # Pula esta partição
+
                 part_usage = p.disk_usage(partition.mountpoint)
+
+                # FILTRAR PARTIÇÕES MUITO PEQUENAS (< 0.5GB)
+                if part_usage.total < (0.5 * 1024**3):  # Menos de 0.5GB
+                    continue
+
                 if ':\\' in partition.mountpoint:
                     nome_particao = partition.mountpoint.split(':\\')[0]
                 else:
