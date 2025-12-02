@@ -126,6 +126,7 @@ def sorteadorTexto(num_caracteres):
     return texto_gerado
 
 def gerarAlerta(idDac,idMonitoramentoD,idMonitoramentoS,idUnidade,valorCaptura):
+    retorno = False
     metricaAlerta = acaoComumBanco(f"SELECT valorMinimo,valorMaximo FROM MetricaAlerta WHERE fkDac = {idDac} AND fkMedicoesDisponiveis = {idMonitoramentoD} ORDER BY valorMinimo;")
     print('Metrica alerta DAC ', metricaAlerta)
     if idMonitoramentoD == 8:
@@ -152,6 +153,7 @@ def gerarAlerta(idDac,idMonitoramentoD,idMonitoramentoS,idUnidade,valorCaptura):
                 else:
                     acaoComumBanco(f"INSERT INTO Alerta(fkUnidadeDeAtendimento,fkMedicoesDisponiveis,fkDac,fkMedicoesSelecionadas,pico,nomeAlerta) VALUES ({idUnidade},{idMonitoramentoD},{idDac},{idMonitoramentoS},'{valorCaptura}','Atenção')")
                     enviandoMensagem("Atenção",idMonitoramentoD,valorCaptura,metricaAlerta[0][0],id_dac,idUnidade)
+                retorno = True
         else:
             if valorCaptura < metricaAlerta[0][0]:
                 acaoComumBanco(f"UPDATE Alerta SET dataTermino = NOW() WHERE idAlerta = {existeAlerta[0][0]}")
@@ -163,7 +165,9 @@ def gerarAlerta(idDac,idMonitoramentoD,idMonitoramentoS,idUnidade,valorCaptura):
                         enviandoMensagem("Alerta",idMonitoramentoD,valorCaptura,metricaAlerta[1][0],id_dac,idUnidade)
                 if valorCaptura > float(existeAlerta[0][1]):
                     acaoComumBanco(f"UPDATE Alerta SET pico = '{valorCaptura}' WHERE idAlerta = {existeAlerta[0][0]}")
-    limparTela()
+                retorno = True
+    limparTela() 
+    return retorno
 
 
 def monitoramentosParaBinario(id_monitoramento_selecionados):
@@ -369,21 +373,28 @@ def conversorByteParaGb(byte):
 
 def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_selecionados):
     print(id_monitoramentos_selecionados)
+    mensagem = ""
     query = "INSERT INTO Leitura (fkUnidadeDeAtendimento,fkDac,fkMedicoesDisponiveis,fkMedicoesSelecionadas,medidaCapturada) VALUES"
     if habilita_usoCPU == True:
         usoCPU = p.cpu_percent(interval=1, percpu=False)
-        gerarAlerta(id_dac,1,id_monitoramentos_selecionados[0],id_unidade_atendimento,usoCPU)
+        alertaCpu = gerarAlerta(id_dac,1,id_monitoramentos_selecionados[0],id_unidade_atendimento,usoCPU)
+        if alertaCpu == True:
+            mensagem += "CPU,"
         query += f"({id_unidade_atendimento},{id_dac},1,{id_monitoramentos_selecionados[0]},'{usoCPU}'),"
     if habilita_Mem_used == True:
         Mem_used = p.virtual_memory().percent
-        gerarAlerta(id_dac,6,id_monitoramentos_selecionados[5],id_unidade_atendimento,Mem_used)
+        alertaMemoria = gerarAlerta(id_dac,6,id_monitoramentos_selecionados[5],id_unidade_atendimento,Mem_used)
+        if alertaMemoria == True:
+            mensagem += "Memória,"
         query += f"({id_unidade_atendimento},{id_dac},6,{id_monitoramentos_selecionados[5]},'{Mem_used}'),"
     if habilita_usoDisco == True:
         if os.name == 'nt':
             memoria_used = p.disk_usage("C:\\").percent
         else:
             memoria_used = p.disk_usage("/").percent
-        gerarAlerta(id_dac,10,id_monitoramentos_selecionados[9],id_unidade_atendimento,memoria_used)
+        alertaDisco = gerarAlerta(id_dac,10,id_monitoramentos_selecionados[9],id_unidade_atendimento,memoria_used)
+        if alertaDisco == True:
+            mensagem += "Disco,"
         query += f"({id_unidade_atendimento},{id_dac},10,{id_monitoramentos_selecionados[9]},'{memoria_used}'),"
     if habilita_processosAtivos == True:
         qtd_processo_ativos = len(p.pids())
@@ -508,6 +519,12 @@ def monitoramentoHardware(id_unidade_atendimento,id_dac,id_monitoramentos_seleci
         query = query[:-1] + ";"
     else:
         query = ""
+    if mensagem.endswith(","):
+        mensagem = mensagem[:-1]
+        query_update = f"UPDATE Dac SET statusDac = 'Alerta({mensagem})' WHERE idDac = {id_dac};"
+    else:
+        query_update = f"UPDATE Dac SET statusDac = 'Ativo' WHERE idDac = {id_dac};"
+    acaoComumBanco(query_update)
     if query != "":
         acaoComumBanco(query)
     if habilita_usoCPU == True and habilita_iops == True:
